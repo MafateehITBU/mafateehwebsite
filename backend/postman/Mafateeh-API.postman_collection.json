@@ -1,0 +1,489 @@
+{
+  "info": {
+    "name": "Mafateeh CMS API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Import this file in Postman. Set collection variables: baseUrl (e.g. http://localhost:4000), adminEmail, adminPassword. Run **Admin / Auth / Login** first; copy `token` from the response into the `token` variable (or use a test script to set it)."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "token", "value": "" },
+    { "key": "adminEmail", "value": "admin@mafateeh.local" },
+    { "key": "adminPassword", "value": "ChangeMe_Admin123!" },
+    { "key": "tagId", "value": "" },
+    { "key": "blogCategoryId", "value": "" },
+    { "key": "portfolioCategoryId", "value": "" },
+    { "key": "serviceCategoryId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "GET Static site info",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/static-site-info" }
+        },
+        {
+          "name": "GET Privacy policy",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/privacy-policy" }
+        },
+        {
+          "name": "GET SEO",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/seo" }
+        },
+        {
+          "name": "GET Blog categories",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/blog-categories" }
+        },
+        {
+          "name": "GET Tags",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/tags" }
+        },
+        {
+          "name": "GET Blogs",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/blogs" }
+        },
+        {
+          "name": "GET Blog by slug",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/blogs/sample-slug" }
+        },
+        {
+          "name": "GET Partners",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/partners" }
+        },
+        {
+          "name": "GET Portfolio categories",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/portfolio-categories" }
+        },
+        {
+          "name": "GET Portfolios",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/portfolios" }
+        },
+        {
+          "name": "GET Portfolio by slug",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/portfolios/sample-slug" }
+        },
+        {
+          "name": "GET Testimonials",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/testimonials" }
+        },
+        {
+          "name": "GET Service categories",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/service-categories" }
+        },
+        {
+          "name": "GET Services",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/services" }
+        },
+        {
+          "name": "GET Packages",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/public/packages" }
+        },
+        {
+          "name": "POST Contact",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"phoneNumber\": \"+966500000000\",\n  \"service\": \"Consulting\",\n  \"inquiry\": \"Hello, I would like more information.\"\n}"
+            },
+            "url": "{{baseUrl}}/api/public/contact"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (json && json.token) { pm.collectionVariables.set('token', json.token); }",
+                      "pm.test('Has token', function () { pm.expect(json.token).to.be.a('string'); });"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/auth/login"
+              }
+            },
+            {
+              "name": "Me",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/auth/me"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload & health",
+          "item": [
+            {
+              "name": "GET Cloudinary configured",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/health/cloudinary"
+              }
+            },
+            {
+              "name": "POST Upload image (form-data: file)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [{ "key": "file", "type": "file", "src": "" }]
+                },
+                "url": "{{baseUrl}}/api/admin/upload?folder=blogs"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Static & legal & SEO",
+          "item": [
+            {
+              "name": "GET Static site info (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/static-site-info"
+              }
+            },
+            {
+              "name": "PUT Static site info",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phoneNumber\": \"+966500000000\",\n  \"email\": \"info@example.com\",\n  \"address\": \"Riyadh\",\n  \"businessHours\": \"Sun–Thu 9–5\",\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/static-site-info"
+              }
+            },
+            {
+              "name": "GET Privacy (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/privacy-policy"
+              }
+            },
+            {
+              "name": "PUT Privacy",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"content\": \"<p>Updated privacy policy HTML/text.</p>\"\n}" },
+                "url": "{{baseUrl}}/api/admin/privacy-policy"
+              }
+            },
+            {
+              "name": "GET SEO (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/seo"
+              }
+            },
+            {
+              "name": "PUT SEO",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"googleTagId\": \"GTM-XXXX\",\n  \"metaTitle\": \"Mafateeh\",\n  \"metaDescription\": \"Company description\",\n  \"metaKeywords\": \"keys\",\n  \"ogImageUrl\": \"https://example.com/og.jpg\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/seo"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tags & blogs",
+          "item": [
+            {
+              "name": "GET Tags (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/tags"
+              }
+            },
+            {
+              "name": "POST Tag",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"News\"\n}" },
+                "url": "{{baseUrl}}/api/admin/tags"
+              }
+            },
+            {
+              "name": "PUT Tag",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"News Updated\"\n}" },
+                "url": "{{baseUrl}}/api/admin/tags/{{tagId}}"
+              }
+            },
+            {
+              "name": "DELETE Tag",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/tags/{{tagId}}"
+              }
+            },
+            {
+              "name": "POST Blog category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"General\"\n}" },
+                "url": "{{baseUrl}}/api/admin/blog-categories"
+              }
+            },
+            {
+              "name": "GET Blog categories (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/blog-categories"
+              }
+            },
+            {
+              "name": "POST Blog",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoryId\": \"{{blogCategoryId}}\",\n  \"title\": \"Hello world\",\n  \"content\": \"<p>Post body</p>\",\n  \"published\": true,\n  \"tagIds\": []\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/blogs"
+              }
+            },
+            {
+              "name": "GET Blogs (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/blogs"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Partners & portfolio & services & packages",
+          "item": [
+            {
+              "name": "POST Partner",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"Partner Co\"\n}" },
+                "url": "{{baseUrl}}/api/admin/partners"
+              }
+            },
+            {
+              "name": "GET Partners (admin)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/partners"
+              }
+            },
+            {
+              "name": "POST Portfolio category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"Web\"\n}" },
+                "url": "{{baseUrl}}/api/admin/portfolio-categories"
+              }
+            },
+            {
+              "name": "POST Portfolio",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoryId\": \"{{portfolioCategoryId}}\",\n  \"title\": \"Project A\",\n  \"shortDescription\": \"Short text\",\n  \"link\": \"https://example.com\",\n  \"tagIds\": []\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/portfolios"
+              }
+            },
+            {
+              "name": "POST Service category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"Digital\"\n}" },
+                "url": "{{baseUrl}}/api/admin/service-categories"
+              }
+            },
+            {
+              "name": "POST Service",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoryId\": \"{{serviceCategoryId}}\",\n  \"title\": \"Consulting\",\n  \"description\": \"We help you grow.\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/services"
+              }
+            },
+            {
+              "name": "POST Package",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Starter\",\n  \"shortDescription\": \"For small teams\",\n  \"price\": 999,\n  \"privileges\": [\"Feature A\", \"Feature B\"]\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/packages"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Testimonials & contacts & RBAC",
+          "item": [
+            {
+              "name": "POST Testimonial",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Client\",\n  \"position\": \"CEO\",\n  \"rate\": 5,\n  \"content\": \"Great work!\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/testimonials"
+              }
+            },
+            {
+              "name": "GET Contacts",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/contacts"
+              }
+            },
+            {
+              "name": "GET Roles",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/roles"
+              }
+            },
+            {
+              "name": "POST Role",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Support\",\n  \"description\": \"Read-only contacts\",\n  \"permissions\": [\"contacts\"]\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/roles"
+              }
+            },
+            {
+              "name": "GET Admins",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/api/admin/admins"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

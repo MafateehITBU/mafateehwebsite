@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  ARCHIVED
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions Json
+  admins      Admin[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  isActive     Boolean  @default(true)
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id])
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model StaticSiteInfo {
+  id               String   @id @default(cuid())
+  logoUrl          String?
+  phoneNumber      String?
+  address          String?
+  businessHours    String?
+  email            String?
+  latitude         Float?
+  longitude        Float?
+  socialInstagram  String?
+  socialFacebook   String?
+  socialLinkedin   String?
+  socialYoutube    String?
+  updatedAt        DateTime @updatedAt
+}
+
+model PrivacyPolicy {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model BlogCategory {
+  id    String @id @default(cuid())
+  name  String
+  slug  String @unique
+  blogs Blog[]
+}
+
+model Tag {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  blogs       BlogTag[]
+  portfolios  PortfolioTag[]
+}
+
+model Blog {
+  id               String       @id @default(cuid())
+  categoryId       String
+  category         BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  title            String
+  slug             String       @unique
+  content          String       @db.Text
+  featuredImageUrl String?
+  published        Boolean      @default(false)
+  tags             BlogTag[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model BlogTag {
+  blogId String
+  tagId  String
+  blog   Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([blogId, tagId])
+}
+
+model Partner {
+  id      String @id @default(cuid())
+  name    String
+  logoUrl String?
+}
+
+model PortfolioCategory {
+  id         String      @id @default(cuid())
+  name       String
+  slug       String      @unique
+  portfolios Portfolio[]
+}
+
+model Portfolio {
+  id               String            @id @default(cuid())
+  categoryId       String
+  category         PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  title            String
+  slug             String            @unique
+  shortDescription String
+  featuredImageUrl String?
+  link             String?
+  tags             PortfolioTag[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model PortfolioTag {
+  portfolioId String
+  tagId       String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([portfolioId, tagId])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  position  String?
+  rate      Int
+  content   String   @db.Text
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ServiceCategory {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  services Service[]
+}
+
+model Service {
+  id          String          @id @default(cuid())
+  categoryId  String
+  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  title       String
+  description String          @db.Text
+  iconUrl     String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model Package {
+  id               String   @id @default(cuid())
+  name             String
+  shortDescription String
+  price            Decimal  @db.Decimal(12, 2)
+  privileges       Json
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ContactSubmission {
+  id          String        @id @default(cuid())
+  name        String
+  phoneNumber String?
+  email       String
+  service     String?
+  inquiry     String        @db.Text
+  status      ContactStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+}
+
+model SEOSettings {
+  id              String   @id @default(cuid())
+  googleTagId     String?
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  metaKeywords    String?
+  ogImageUrl      String?
+  updatedAt       DateTime @updatedAt
+}
