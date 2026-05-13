@@ -1,3 +1,4 @@
+import "../src/config/env";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
@@ -23,14 +24,10 @@ async function main() {
       permissions: [
         "static_info",
         "privacy",
-        "tags",
-        "blog_categories",
         "blogs",
         "partners",
-        "portfolio_categories",
         "portfolios",
         "testimonials",
-        "service_categories",
         "services",
         "packages",
         "contacts",

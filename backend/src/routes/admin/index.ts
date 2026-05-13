@@ -65,7 +65,10 @@ adminRouter.post(
         id: admin.id,
         email: admin.email,
         name: admin.name,
-        role: admin.role,
+        role: {
+          ...admin.role,
+          permissions: parsePermissions(admin.role.permissions),
+        },
       },
     });
   })
@@ -85,7 +88,10 @@ adminRouter.get(
       email: admin.email,
       name: admin.name,
       isActive: admin.isActive,
-      role: admin.role,
+      role: {
+        ...admin.role,
+        permissions: parsePermissions(admin.role.permissions),
+      },
     });
   })
 );
@@ -238,7 +244,7 @@ const tagWrite = z.object({
 
 adminRouter.get(
   "/tags",
-  requirePermission("tags"),
+  requirePermission("blogs"),
   asyncHandler(async (_req, res) => {
     res.json(await prisma.tag.findMany({ orderBy: { name: "asc" } }));
   })
@@ -246,7 +252,7 @@ adminRouter.get(
 
 adminRouter.post(
   "/tags",
-  requirePermission("tags"),
+  requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     const body = tagWrite.parse(req.body);
     const slug =
@@ -264,7 +270,7 @@ adminRouter.post(
 
 adminRouter.put(
   "/tags/:id",
-  requirePermission("tags"),
+  requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     const body = tagWrite.partial().parse(req.body);
     const existing = await prisma.tag.findUnique({ where: { id: req.params.id } });
@@ -297,7 +303,7 @@ adminRouter.put(
 
 adminRouter.delete(
   "/tags/:id",
-  requirePermission("tags"),
+  requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     await prisma.tag.delete({ where: { id: req.params.id } });
     res.status(204).send();
@@ -312,7 +318,7 @@ const blogCatSchema = z.object({
 
 adminRouter.get(
   "/blog-categories",
-  requirePermission("blog_categories"),
+  requirePermission("blogs"),
   asyncHandler(async (_req, res) => {
     res.json(await prisma.blogCategory.findMany({ orderBy: { name: "asc" } }));
   })
@@ -320,7 +326,7 @@ adminRouter.get(
 
 adminRouter.post(
   "/blog-categories",
-  requirePermission("blog_categories"),
+  requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     const body = blogCatSchema.parse(req.body);
     const slug =
@@ -337,7 +343,7 @@ adminRouter.post(
 
 adminRouter.put(
   "/blog-categories/:id",
-  requirePermission("blog_categories"),
+  requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     const body = blogCatSchema.partial().parse(req.body);
     const existing = await prisma.blogCategory.findUnique({
@@ -373,7 +379,7 @@ adminRouter.put(
 
 adminRouter.delete(
   "/blog-categories/:id",
-  requirePermission("blog_categories"),
+  requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     await prisma.blogCategory.delete({ where: { id: req.params.id } });
     res.status(204).send();
@@ -556,7 +562,7 @@ const portfolioCatSchema = z.object({
 
 adminRouter.get(
   "/portfolio-categories",
-  requirePermission("portfolio_categories"),
+  requirePermission("portfolios"),
   asyncHandler(async (_req, res) => {
     res.json(
       await prisma.portfolioCategory.findMany({ orderBy: { name: "asc" } })
@@ -566,7 +572,7 @@ adminRouter.get(
 
 adminRouter.post(
   "/portfolio-categories",
-  requirePermission("portfolio_categories"),
+  requirePermission("portfolios"),
   asyncHandler(async (req, res) => {
     const body = portfolioCatSchema.parse(req.body);
     const slug =
@@ -585,7 +591,7 @@ adminRouter.post(
 
 adminRouter.put(
   "/portfolio-categories/:id",
-  requirePermission("portfolio_categories"),
+  requirePermission("portfolios"),
   asyncHandler(async (req, res) => {
     const body = portfolioCatSchema.partial().parse(req.body);
     const existing = await prisma.portfolioCategory.findUnique({
@@ -621,7 +627,7 @@ adminRouter.put(
 
 adminRouter.delete(
   "/portfolio-categories/:id",
-  requirePermission("portfolio_categories"),
+  requirePermission("portfolios"),
   asyncHandler(async (req, res) => {
     await prisma.portfolioCategory.delete({ where: { id: req.params.id } });
     res.status(204).send();
@@ -821,7 +827,7 @@ const serviceCatSchema = z.object({
 
 adminRouter.get(
   "/service-categories",
-  requirePermission("service_categories"),
+  requirePermission("services"),
   asyncHandler(async (_req, res) => {
     res.json(
       await prisma.serviceCategory.findMany({ orderBy: { name: "asc" } })
@@ -831,7 +837,7 @@ adminRouter.get(
 
 adminRouter.post(
   "/service-categories",
-  requirePermission("service_categories"),
+  requirePermission("services"),
   asyncHandler(async (req, res) => {
     const body = serviceCatSchema.parse(req.body);
     const slug =
@@ -850,7 +856,7 @@ adminRouter.post(
 
 adminRouter.put(
   "/service-categories/:id",
-  requirePermission("service_categories"),
+  requirePermission("services"),
   asyncHandler(async (req, res) => {
     const body = serviceCatSchema.partial().parse(req.body);
     const existing = await prisma.serviceCategory.findUnique({
@@ -886,7 +892,7 @@ adminRouter.put(
 
 adminRouter.delete(
   "/service-categories/:id",
-  requirePermission("service_categories"),
+  requirePermission("services"),
   asyncHandler(async (req, res) => {
     await prisma.serviceCategory.delete({ where: { id: req.params.id } });
     res.status(204).send();

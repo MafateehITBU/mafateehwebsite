@@ -3,6 +3,35 @@ import { z } from "zod";
 
 config();
 
+function resolveDatabaseUrl(): string {
+  const pw = process.env.POSTGRES_PASSWORD;
+  if (pw !== undefined && String(pw).trim() !== "") {
+    const u = process.env.POSTGRES_USER ?? "postgres";
+    const h = process.env.POSTGRES_HOST ?? "localhost";
+    const port = process.env.POSTGRES_PORT ?? "5432";
+    const db = process.env.POSTGRES_DATABASE ?? "mafateeh";
+    return `postgresql://${encodeURIComponent(u)}:${encodeURIComponent(String(pw).trim())}@${h}:${port}/${db}?schema=public`;
+  }
+  const url = process.env.DATABASE_URL?.trim().replace(/^["']|["']$/g, "");
+  if (!url) {
+    throw new Error(
+      "Set POSTGRES_PASSWORD or DATABASE_URL in backend/.env (see .env.example)."
+    );
+  }
+  // Template credentials almost never match a local pgAdmin install → P1000.
+  if (url.includes("://postgres:postgres@")) {
+    throw new Error(
+      "PostgreSQL login failed because POSTGRES_PASSWORD is empty and DATABASE_URL still uses the default user postgres with password postgres. " +
+        "In backend/.env set POSTGRES_PASSWORD to the exact password you use for that user in pgAdmin (same host/port/database as POSTGRES_*). " +
+        "If your role is not named postgres, set POSTGRES_USER as well. " +
+        "If you truly use password postgres, set POSTGRES_PASSWORD=postgres explicitly."
+    );
+  }
+  return url;
+}
+
+process.env.DATABASE_URL = resolveDatabaseUrl();
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().default(4000),
