@@ -1,5 +1,7 @@
 generator client {
   provider = "prisma-client-js"
+  /// Avoid generating under node_modules/.prisma (often locked on Windows + OneDrive).
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -41,6 +43,7 @@ model StaticSiteInfo {
   logoUrl          String?
   phoneNumber      String?
   address          String?
+  addressAr        String   @default("")
   businessHours    String?
   email            String?
   latitude         Float?
@@ -55,14 +58,16 @@ model StaticSiteInfo {
 model PrivacyPolicy {
   id        String   @id @default(cuid())
   content   String   @db.Text
+  contentAr String   @db.Text
   updatedAt DateTime @updatedAt
 }
 
 model BlogCategory {
-  id    String @id @default(cuid())
-  name  String
-  slug  String @unique
-  blogs Blog[]
+  id     String @id @default(cuid())
+  name   String
+  nameAr String
+  slug   String @unique
+  blogs  Blog[]
 }
 
 model Tag {
@@ -78,8 +83,14 @@ model Blog {
   categoryId       String
   category         BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   title            String
+  titleAr          String       @db.Text
   slug             String       @unique
   content          String       @db.Text
+  contentAr        String       @db.Text
+  /// Estimated reading time in whole minutes (derived from content on create/update).
+  readTime         Int          @default(1)
+  /// Number of times the published post was opened on the public site.
+  readCount        Int          @default(0)
   featuredImageUrl String?
   published        Boolean      @default(false)
   tags             BlogTag[]
@@ -103,24 +114,27 @@ model Partner {
 }
 
 model PortfolioCategory {
-  id         String      @id @default(cuid())
-  name       String
-  slug       String      @unique
+  id          String      @id @default(cuid())
+  name        String
+  nameAr      String
+  slug        String      @unique
   portfolios Portfolio[]
 }
 
 model Portfolio {
-  id               String            @id @default(cuid())
-  categoryId       String
-  category         PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  title            String
-  slug             String            @unique
-  shortDescription String
-  featuredImageUrl String?
-  link             String?
-  tags             PortfolioTag[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                  String            @id @default(cuid())
+  categoryId          String
+  category            PortfolioCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  title               String
+  titleAr             String
+  slug                String            @unique
+  shortDescription    String
+  shortDescriptionAr  String
+  featuredImageUrl    String?
+  link                String?
+  tags                PortfolioTag[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 }
 
 model PortfolioTag {
@@ -133,43 +147,53 @@ model PortfolioTag {
 }
 
 model Testimonial {
-  id        String   @id @default(cuid())
-  name      String
-  position  String?
-  rate      Int
-  content   String   @db.Text
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  nameAr     String
+  position   String?
+  positionAr String
+  rate       Int
+  content    String   @db.Text
+  contentAr  String   @db.Text
+  imageUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model ServiceCategory {
   id       String    @id @default(cuid())
   name     String
+  nameAr   String
   slug     String    @unique
   services Service[]
 }
 
 model Service {
-  id          String          @id @default(cuid())
-  categoryId  String
-  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  title       String
-  description String          @db.Text
-  iconUrl     String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id             String          @id @default(cuid())
+  categoryId     String
+  category       ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  title          String
+  titleAr        String
+  description    String          @db.Text
+  descriptionAr  String          @db.Text
+  /// Iconify icon id (e.g. mdi:web) for @iconify/react
+  icon           String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Package {
-  id               String   @id @default(cuid())
-  name             String
-  shortDescription String
-  price            Decimal  @db.Decimal(12, 2)
-  privileges       Json
-  sortOrder        Int      @default(0)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  name                String
+  nameAr              String
+  shortDescription    String
+  shortDescriptionAr  String
+  price               Decimal  @db.Decimal(12, 2)
+  privileges          Json
+  privilegesAr        Json
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model ContactSubmission {

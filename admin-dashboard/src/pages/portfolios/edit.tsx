@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
 import { ImageUploadField } from "../../components/ImageUploadField";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
 
 type PortfolioRecord = {
   id?: string;
@@ -37,7 +38,10 @@ export const PortfolioEdit = () => {
         <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
           <Select {...catProps} />
         </Form.Item>
-        <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+        <Form.Item name="title" label="Title (English)" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item name="titleAr" label="Title (Arabic)" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item name="slug" label="Slug (optional)">
@@ -45,10 +49,17 @@ export const PortfolioEdit = () => {
         </Form.Item>
         <Form.Item
           name="shortDescription"
-          label="Short description"
+          label="Short description (English)"
           rules={[{ required: true }]}
         >
-          <Input.TextArea rows={4} />
+          <MultilineTextArea rows={4} />
+        </Form.Item>
+        <Form.Item
+          name="shortDescriptionAr"
+          label="Short description (Arabic)"
+          rules={[{ required: true }]}
+        >
+          <MultilineTextArea rows={4} />
         </Form.Item>
         <ImageUploadField
           form={form}

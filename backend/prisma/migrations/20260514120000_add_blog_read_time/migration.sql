@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Blog" ADD COLUMN "readTime" INTEGER NOT NULL DEFAULT 1;

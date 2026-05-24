@@ -1,16 +1,23 @@
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, InputNumber } from "antd";
 import { ImageUploadField } from "../../components/ImageUploadField";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
 
 export const TestimonialCreate = () => {
   const { formProps, saveButtonProps, form } = useForm({ resource: "testimonials" });
   return (
     <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical">
-        <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+        <Form.Item name="name" label="Name (English)" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="position" label="Position">
+        <Form.Item name="nameAr" label="Name (Arabic)" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item name="position" label="Position (English)">
+          <Input />
+        </Form.Item>
+        <Form.Item name="positionAr" label="Position (Arabic)" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item
@@ -21,8 +28,11 @@ export const TestimonialCreate = () => {
         >
           <InputNumber min={1} max={5} />
         </Form.Item>
-        <Form.Item name="content" label="Content" rules={[{ required: true }]}>
-          <Input.TextArea rows={6} />
+        <Form.Item name="content" label="Content (English)" rules={[{ required: true }]}>
+          <MultilineTextArea rows={6} />
+        </Form.Item>
+        <Form.Item name="contentAr" label="Content (Arabic)" rules={[{ required: true }]}>
+          <MultilineTextArea rows={6} />
         </Form.Item>
         <ImageUploadField
           form={form}

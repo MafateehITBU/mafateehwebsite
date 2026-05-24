@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { HttpError } from "../lib/httpError";
+import { getTopReadBlogs, recordBlogRead } from "../lib/blogs";
+import { sanitizeRichHtml } from "../lib/richHtml";
 
 const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -34,7 +36,15 @@ publicRouter.get(
   "/privacy-policy",
   asyncHandler(async (_req, res) => {
     const row = await prisma.privacyPolicy.findFirst();
-    res.json(row ?? null);
+    if (!row) {
+      res.json(null);
+      return;
+    }
+    res.json({
+      ...row,
+      content: sanitizeRichHtml(row.content, { extended: true }),
+      contentAr: sanitizeRichHtml(row.contentAr, { extended: true }),
+    });
   })
 );
 
@@ -91,6 +101,14 @@ publicRouter.get(
 );
 
 publicRouter.get(
+  "/blogs/most-read",
+  asyncHandler(async (_req, res) => {
+    const rows = await getTopReadBlogs(3);
+    res.json(rows);
+  })
+);
+
+publicRouter.get(
   "/blogs/:slug",
   asyncHandler(async (req, res) => {
     const row = await prisma.blog.findFirst({
@@ -102,6 +120,15 @@ publicRouter.get(
     });
     if (!row) throw new HttpError(404, "Blog not found");
     res.json(row);
+  })
+);
+
+publicRouter.post(
+  "/blogs/:slug/view",
+  asyncHandler(async (req, res) => {
+    const recorded = await recordBlogRead(req.params.slug);
+    if (!recorded) throw new HttpError(404, "Blog not found");
+    res.status(204).send();
   })
 );
 

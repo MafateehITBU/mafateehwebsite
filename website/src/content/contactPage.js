@@ -1,0 +1,121 @@
+/** @typedef {{ value: string, label: string }} ContactServiceOption */
+
+/** @type {Record<'en' | 'ar', {
+ *   formHeading: string,
+ *   formSubtitle: string,
+ *   fullName: string,
+ *   phoneNumber: string,
+ *   email: string,
+ *   service: string,
+ *   inquiry: string,
+ *   chooseService: string,
+ *   sendMessage: string,
+ *   sending: string,
+ *   success: string,
+ *   validation: {
+ *     required: string,
+ *     emailInvalid: string,
+ *     formInvalid: string,
+ *     nameTooLong: string,
+ *     phoneTooLong: string,
+ *     inquiryTooLong: string,
+ *   },
+ *   supportHeading: string,
+ *   priorityLine: string,
+ *   emailLabel: string,
+ *   businessHours: string,
+ *   followUs: string,
+ *   mapTitle: string,
+ *   placeholders: {
+ *     fullName: string,
+ *     phoneNumber: string,
+ *     email: string,
+ *     inquiry: string,
+ *   },
+ *   services: ContactServiceOption[],
+ * }>} */
+export const CONTACT_PAGE_CONTENT = {
+  en: {
+    formHeading: 'Send Us a Message',
+    formSubtitle:
+      'Tell us about your project and our team will get back to you as soon as possible.',
+    fullName: 'Full Name',
+    phoneNumber: 'Phone Number',
+    email: 'Email Address',
+    service: 'Choose Your Service',
+    inquiry: 'Your Inquiry',
+    chooseService: 'Select a service',
+    sendMessage: 'Send Message',
+    sending: 'Sending...',
+    success: 'Thank you! Your message has been sent successfully.',
+    validation: {
+      required: 'This field is required.',
+      emailInvalid: 'Please enter a valid email address.',
+      formInvalid: 'Please fill in all required fields correctly.',
+      nameTooLong: 'Name must be 200 characters or fewer.',
+      phoneTooLong: 'Phone number must be 50 characters or fewer.',
+      inquiryTooLong: 'Inquiry must be 10,000 characters or fewer.',
+    },
+    supportHeading: 'Elite Support',
+    priorityLine: 'Direct Priority Line',
+    emailLabel: 'Email',
+    businessHours: 'Business Hours',
+    followUs: 'Follow Us',
+    mapTitle: 'Our location',
+    placeholders: {
+      fullName: 'John Doe',
+      phoneNumber: '+966 5XX XXX XXXX',
+      email: 'you@company.com',
+      inquiry: 'How can we help you?',
+    },
+    services: [
+      { value: 'IT Solution', label: 'IT Solution' },
+      { value: 'Digital Marketing', label: 'Digital Marketing' },
+      { value: 'Branding', label: 'Branding' },
+    ],
+  },
+  ar: {
+    formHeading: 'أرسل لنا رسالة',
+    formSubtitle: 'أخبرنا عن مشروعك وسيتواصل معك فريقنا في أقرب وقت ممكن.',
+    fullName: 'الاسم الكامل',
+    phoneNumber: 'رقم الهاتف',
+    email: 'البريد الإلكتروني',
+    service: 'اختر خدمتك',
+    inquiry: 'استفسارك',
+    chooseService: 'اختر خدمة',
+    sendMessage: 'إرسال الرسالة',
+    sending: 'جاري الإرسال...',
+    success: 'شكراً لك! تم إرسال رسالتك بنجاح.',
+    validation: {
+      required: 'هذا الحقل مطلوب.',
+      emailInvalid: 'يرجى إدخال بريد إلكتروني صالح.',
+      formInvalid: 'يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح.',
+      nameTooLong: 'يجب ألا يتجاوز الاسم 200 حرف.',
+      phoneTooLong: 'يجب ألا يتجاوز رقم الهاتف 50 حرفاً.',
+      inquiryTooLong: 'يجب ألا يتجاوز الاستفسار 10,000 حرف.',
+    },
+    supportHeading: 'دعم متميز',
+    priorityLine: 'خط الأولوية المباشر',
+    emailLabel: 'البريد الإلكتروني',
+    businessHours: 'ساعات العمل',
+    followUs: 'تابعنا',
+    mapTitle: 'موقعنا',
+    placeholders: {
+      fullName: 'محمد أحمد',
+      phoneNumber: '+966 5XX XXX XXXX',
+      email: 'you@company.com',
+      inquiry: 'كيف يمكننا مساعدتك؟',
+    },
+    services: [
+      { value: 'IT Solution', label: 'حلول تقنية المعلومات' },
+      { value: 'Digital Marketing', label: 'التسويق الرقمي' },
+      { value: 'Branding', label: 'الهوية والعلامة التجارية' },
+    ],
+  },
+}
+
+/** @param {'en' | 'ar'} locale */
+export function getContactPageContent(locale) {
+  const key = locale === 'ar' ? 'ar' : 'en'
+  return CONTACT_PAGE_CONTENT[key] ?? CONTACT_PAGE_CONTENT.en
+}

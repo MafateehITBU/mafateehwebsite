@@ -13,6 +13,8 @@ import {
 } from "antd";
 import { getToken } from "../../providers/authProvider";
 import { notify } from "../../lib/notify";
+import { BlogRichTextEditor } from "../../components/BlogRichTextEditor";
+import { blogContentRequired } from "../../lib/htmlContent";
 import { FormSection } from "../../components/ui";
 
 export const BlogCreate = () => {
@@ -120,14 +122,25 @@ export const BlogCreate = () => {
           <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
             <Select {...catProps} />
           </Form.Item>
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+          <Form.Item name="title" label="Title (English)" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="slug" label="Slug (optional)">
+          <Form.Item name="titleAr" label="Title (Arabic)" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="content" label="Content" rules={[{ required: true }]}>
-            <Input.TextArea rows={12} />
+          <Form.Item
+            name="content"
+            label="Content (English)"
+            rules={[{ validator: blogContentRequired }]}
+          >
+            <BlogRichTextEditor dir="ltr" placeholder="Write content in English…" />
+          </Form.Item>
+          <Form.Item
+            name="contentAr"
+            label="Content (Arabic)"
+            rules={[{ validator: blogContentRequired }]}
+          >
+            <BlogRichTextEditor dir="rtl" placeholder="اكتب المحتوى بالعربية…" />
           </Form.Item>
           <Form.Item label="Featured image">
             <Space direction="vertical" style={{ width: "100%" }}>

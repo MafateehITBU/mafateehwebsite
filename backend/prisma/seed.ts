@@ -1,6 +1,6 @@
 import "../src/config/env";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/generated/prisma";
 
 const prisma = new PrismaClient();
 
@@ -58,7 +58,10 @@ async function main() {
   }
   if (!(await prisma.privacyPolicy.findFirst())) {
     await prisma.privacyPolicy.create({
-      data: { content: "Update your privacy policy from the admin dashboard." },
+      data: {
+        content: "Update your privacy policy from the admin dashboard.",
+        contentAr: "قم بتحديث سياسة الخصوصية من لوحة الإدارة.",
+      },
     });
   }
   if (!(await prisma.sEOSettings.findFirst())) {

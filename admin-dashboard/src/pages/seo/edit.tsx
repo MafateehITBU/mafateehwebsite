@@ -1,6 +1,7 @@
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input } from "antd";
 import { ImageUploadField } from "../../components/ImageUploadField";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
 
 export const SeoEdit = () => {
   const { formProps, saveButtonProps, query, form } = useForm({ resource: "seo" });
@@ -15,7 +16,7 @@ export const SeoEdit = () => {
           <Input />
         </Form.Item>
         <Form.Item label="Meta description" name="metaDescription">
-          <Input.TextArea rows={3} />
+          <MultilineTextArea rows={3} />
         </Form.Item>
         <Form.Item label="Meta keywords" name="metaKeywords">
           <Input />

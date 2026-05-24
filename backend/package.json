@@ -6,12 +6,13 @@
     "dev": "npx tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "db:generate": "prisma generate",
+    "db:generate": "npx tsx scripts/run-prisma.ts generate",
     "db:up": "docker compose up -d",
     "db:setup": "npm run db:up && npm run db:init",
     "db:init": "node scripts/run-db-init.cjs",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
+    "db:migrate": "npx tsx scripts/run-prisma.ts migrate dev",
+    "db:deploy": "npx tsx scripts/run-prisma.ts migrate deploy",
+    "db:push": "npx tsx scripts/run-prisma.ts db push",
     "db:seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {

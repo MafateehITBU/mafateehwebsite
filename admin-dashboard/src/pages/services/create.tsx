@@ -1,6 +1,7 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
-import { ImageUploadField } from "../../components/ImageUploadField";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
+import { IconifyIconPicker } from "../../components/IconifyIconPicker";
 import { FormSection } from "../../components/ui";
 
 export const ServiceCreate = () => {
@@ -14,7 +15,7 @@ export const ServiceCreate = () => {
     <Create saveButtonProps={saveButtonProps}>
       <FormSection
         title="Service Details"
-        description="Define service content, category, and icon."
+        description="Define service content, category, and an Iconify icon."
       >
         <Form {...formProps} layout="vertical">
           <Form.Item
@@ -24,13 +25,19 @@ export const ServiceCreate = () => {
           >
             <Select {...selectProps} />
           </Form.Item>
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+          <Form.Item name="title" label="Title (English)" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="description" label="Description" rules={[{ required: true }]}>
-            <Input.TextArea rows={6} />
+          <Form.Item name="titleAr" label="Title (Arabic)" rules={[{ required: true }]}>
+            <Input />
           </Form.Item>
-          <ImageUploadField form={form} fieldName="iconUrl" label="Icon image" folder="services" />
+          <Form.Item name="description" label="Description (English)" rules={[{ required: true }]}>
+            <MultilineTextArea rows={6} />
+          </Form.Item>
+          <Form.Item name="descriptionAr" label="Description (Arabic)" rules={[{ required: true }]}>
+            <MultilineTextArea rows={6} />
+          </Form.Item>
+          <IconifyIconPicker form={form} fieldName="icon" label="Icon (Iconify)" />
         </Form>
       </FormSection>
     </Create>

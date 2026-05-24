@@ -8,7 +8,10 @@ export const PortfolioCategoryCreate = () => {
   return (
     <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical">
-        <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+        <Form.Item name="name" label="Name (English)" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item name="nameAr" label="Name (Arabic)" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item name="slug" label="Slug (optional)">

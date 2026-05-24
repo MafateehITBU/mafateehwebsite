@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/ensure-node-modules-tsconfig-build.mjs",
     "build": "tsc && refine build",
     "dev": "refine dev",
     "refine": "refine",
@@ -23,6 +24,7 @@
   },
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@iconify/react": "^6.0.2",
     "@refinedev/antd": "^6.0.3",
     "@refinedev/cli": "^2.16.52",
     "@refinedev/core": "^5.0.12",

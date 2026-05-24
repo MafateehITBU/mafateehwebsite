@@ -4,12 +4,12 @@ import {
   EditButton,
   DeleteButton,
 } from "@refinedev/antd";
-import { Table, Space } from "antd";
+import { Icon } from "@iconify/react";
+import { Table, Space, Typography } from "antd";
 import { DataTableWrapper, TableEmptyState } from "../../components/ui";
 
-const isLocalFakePath = (value: unknown): value is string =>
-  typeof value === "string" &&
-  (value.startsWith("C:\\fakepath\\") || value.startsWith("file:///"));
+const isIconifyId = (value: unknown): value is string =>
+  typeof value === "string" && /^[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9._-]*$/i.test(value);
 
 export const ServiceList = () => {
   const { tableProps } = useTable({ resource: "services" });
@@ -23,17 +23,19 @@ export const ServiceList = () => {
           scroll={{ x: 860 }}
         >
           <Table.Column
-            dataIndex="iconUrl"
+            dataIndex="icon"
             title="Icon"
+            width={100}
             render={(v: string | null) =>
-              v && !isLocalFakePath(v) ? (
-                <img
-                  src={v}
-                  alt="Icon"
-                  style={{ width: 40, height: 40, objectFit: "contain" }}
-                />
+              isIconifyId(v) ? (
+                <Space direction="vertical" size={0} align="center">
+                  <Icon icon={v} width={32} height={32} />
+                  <Typography.Text code style={{ fontSize: 10 }}>
+                    {v}
+                  </Typography.Text>
+                </Space>
               ) : (
-                "-"
+                "—"
               )
             }
           />
@@ -43,7 +45,7 @@ export const ServiceList = () => {
             title="Category"
             render={(_, row: { category?: { name?: string } }) => row.category?.name ?? "—"}
           />
-          <Table.Column dataIndex="description" title="Description"/>
+          <Table.Column dataIndex="description" title="Description" />
           <Table.Column
             title="Actions"
             render={(_, r: { id: string }) => (

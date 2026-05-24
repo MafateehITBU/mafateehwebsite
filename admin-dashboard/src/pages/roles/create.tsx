@@ -1,5 +1,6 @@
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
 import { ADMIN_PERMISSION_OPTIONS } from "../../constants/adminPermissions";
 
 export const RoleCreate = () => {
@@ -11,7 +12,7 @@ export const RoleCreate = () => {
           <Input />
         </Form.Item>
         <Form.Item name="description" label="Description">
-          <Input.TextArea rows={2} />
+          <MultilineTextArea rows={2} />
         </Form.Item>
         <Form.Item
           name="permissions"

@@ -24,6 +24,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { getToken } from "../../providers/authProvider";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
 import { notify } from "../../lib/notify";
 
 L.Icon.Default.mergeOptions({
@@ -36,6 +37,7 @@ type StaticSiteInfoForm = {
   logoUrl?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  addressAr?: string;
 };
 
 type UploadResponse = {
@@ -208,10 +210,17 @@ export const StaticSiteInfoEdit = () => {
           <Input />
         </Form.Item>
         <Form.Item label="Address" name="address">
-          <Input.TextArea rows={2} />
+          <MultilineTextArea rows={2} />
+        </Form.Item>
+        <Form.Item
+          label="Address (Arabic)"
+          name="addressAr"
+          rules={[{ required: true, message: "Arabic address is required" }]}
+        >
+          <MultilineTextArea rows={2} />
         </Form.Item>
         <Form.Item label="Business hours" name="businessHours">
-          <Input.TextArea rows={2} />
+          <MultilineTextArea rows={2} />
         </Form.Item>
         <Form.Item label="Email" name="email">
           <Input type="email" />

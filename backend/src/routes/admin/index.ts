@@ -6,6 +6,10 @@ import { prisma } from "../../lib/prisma";
 import { signToken } from "../../lib/jwt";
 import { HttpError } from "../../lib/httpError";
 import { uniqueSlug } from "../../lib/slug";
+import { estimateBlogReadTimeMinutes } from "../../lib/readTime";
+import { isIconifyIconId } from "../../lib/iconify";
+import { normalizeMultiline } from "../../lib/multiline";
+import { sanitizeBlogHtml, sanitizeRichHtml, stripHtmlToPlainText } from "../../lib/blogHtml";
 import { PERMISSIONS, hasPermission, parsePermissions } from "../../lib/permissions";
 import { uploadBuffer, initCloudinary } from "../../lib/cloudinary";
 import { cloudinaryConfigured } from "../../config/env";
@@ -135,9 +139,17 @@ async function getOrCreateStatic() {
 async function getOrCreatePrivacy() {
   let row = await prisma.privacyPolicy.findFirst();
   if (!row) {
-    row = await prisma.privacyPolicy.create({ data: { content: "" } });
+    row = await prisma.privacyPolicy.create({ data: { content: "", contentAr: "" } });
   }
   return row;
+}
+
+function toPrivacyPolicyResponse(row: Awaited<ReturnType<typeof getOrCreatePrivacy>>) {
+  return {
+    ...row,
+    content: sanitizeRichHtml(row.content, { extended: true }),
+    contentAr: sanitizeRichHtml(row.contentAr, { extended: true }),
+  };
 }
 
 async function getOrCreateSeo() {
@@ -151,8 +163,19 @@ async function getOrCreateSeo() {
 const staticSchema = z.object({
   logoUrl: z.string().max(2048).optional().nullable(),
   phoneNumber: z.string().max(100).optional().nullable(),
-  address: z.string().max(2000).optional().nullable(),
-  businessHours: z.string().max(2000).optional().nullable(),
+  address: z
+    .string()
+    .max(2000)
+    .optional()
+    .nullable()
+    .transform((v) => (v == null ? v : normalizeMultiline(v))),
+  addressAr: z.string().min(1).max(2000).transform(normalizeMultiline),
+  businessHours: z
+    .string()
+    .max(2000)
+    .optional()
+    .nullable()
+    .transform((v) => (v == null ? v : normalizeMultiline(v))),
   email: z.string().email().optional().nullable(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
@@ -188,7 +211,7 @@ adminRouter.get(
   "/privacy-policy",
   requirePermission("privacy"),
   asyncHandler(async (_req, res) => {
-    res.json(await getOrCreatePrivacy());
+    res.json(toPrivacyPolicyResponse(await getOrCreatePrivacy()));
   })
 );
 
@@ -196,13 +219,24 @@ adminRouter.put(
   "/privacy-policy",
   requirePermission("privacy"),
   asyncHandler(async (req, res) => {
-    const data = z.object({ content: z.string() }).parse(req.body);
+    const privacyContent = z
+      .string()
+      .min(1)
+      .transform((s) => sanitizeRichHtml(s, { extended: true }))
+      .refine((s) => stripHtmlToPlainText(s).length > 0, "Content is required");
+
+    const data = z
+      .object({
+        content: privacyContent,
+        contentAr: privacyContent,
+      })
+      .parse(req.body);
     const existing = await getOrCreatePrivacy();
     const row = await prisma.privacyPolicy.update({
       where: { id: existing.id },
       data,
     });
-    res.json(row);
+    res.json(toPrivacyPolicyResponse(row));
   })
 );
 
@@ -222,7 +256,12 @@ adminRouter.put(
       .object({
         googleTagId: z.string().max(200).optional().nullable(),
         metaTitle: z.string().max(200).optional().nullable(),
-        metaDescription: z.string().max(2000).optional().nullable(),
+        metaDescription: z
+          .string()
+          .max(2000)
+          .optional()
+          .nullable()
+          .transform((v) => (v == null ? v : normalizeMultiline(v))),
         metaKeywords: z.string().max(500).optional().nullable(),
         ogImageUrl: z.string().max(2048).optional().nullable(),
       })
@@ -313,6 +352,7 @@ adminRouter.delete(
 /** Blog categories */
 const blogCatSchema = z.object({
   name: z.string().min(1).max(200),
+  nameAr: z.string().min(1).max(200),
   slug: z.string().min(1).max(200).optional(),
 });
 
@@ -335,7 +375,7 @@ adminRouter.post(
         return Boolean(await prisma.blogCategory.findUnique({ where: { slug: s } }));
       }));
     const row = await prisma.blogCategory.create({
-      data: { name: body.name, slug },
+      data: { name: body.name, nameAr: body.nameAr, slug },
     });
     res.status(201).json(row);
   })
@@ -345,13 +385,19 @@ adminRouter.put(
   "/blog-categories/:id",
   requirePermission("blogs"),
   asyncHandler(async (req, res) => {
-    const body = blogCatSchema.partial().parse(req.body);
+    const body = blogCatSchema.parse(req.body);
     const existing = await prisma.blogCategory.findUnique({
       where: { id: req.params.id },
     });
     if (!existing) throw new HttpError(404, "Category not found");
     let slug = existing.slug;
-    if (body.name && !body.slug) {
+    if (body.slug) {
+      const clash = await prisma.blogCategory.findFirst({
+        where: { slug: body.slug, NOT: { id: existing.id } },
+      });
+      if (clash) throw new HttpError(409, "Slug already in use");
+      slug = body.slug;
+    } else {
       slug = await uniqueSlug(body.name, async (s) => {
         return Boolean(
           await prisma.blogCategory.findFirst({
@@ -359,17 +405,12 @@ adminRouter.put(
           })
         );
       });
-    } else if (body.slug) {
-      const clash = await prisma.blogCategory.findFirst({
-        where: { slug: body.slug, NOT: { id: existing.id } },
-      });
-      if (clash) throw new HttpError(409, "Slug already in use");
-      slug = body.slug;
     }
     const row = await prisma.blogCategory.update({
       where: { id: existing.id },
       data: {
-        ...(body.name !== undefined ? { name: body.name } : {}),
+        name: body.name,
+        nameAr: body.nameAr,
         slug,
       },
     });
@@ -390,8 +431,17 @@ adminRouter.delete(
 const blogWrite = z.object({
   categoryId: z.string(),
   title: z.string().min(1).max(300),
-  slug: z.string().min(1).max(320).optional(),
-  content: z.string().min(1),
+  titleAr: z.string().min(1),
+  content: z
+    .string()
+    .min(1)
+    .transform(sanitizeBlogHtml)
+    .refine((s) => stripHtmlToPlainText(s).length > 0, "Content is required"),
+  contentAr: z
+    .string()
+    .min(1)
+    .transform(sanitizeBlogHtml)
+    .refine((s) => stripHtmlToPlainText(s).length > 0, "Arabic content is required"),
   featuredImageUrl: z.string().max(2048).optional().nullable(),
   published: z.boolean().optional(),
   tagIds: z.array(z.string()).optional(),
@@ -417,18 +467,20 @@ adminRouter.post(
   requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     const body = blogWrite.parse(req.body);
-    const slug =
-      body.slug ??
-      (await uniqueSlug(body.title, async (s) => {
-        return Boolean(await prisma.blog.findUnique({ where: { slug: s } }));
-      }));
+    const slug = await uniqueSlug(body.title, async (s) => {
+      return Boolean(await prisma.blog.findUnique({ where: { slug: s } }));
+    });
     const { tagIds, ...rest } = body;
+    const readTime = estimateBlogReadTimeMinutes(rest.content, rest.contentAr);
     const blog = await prisma.blog.create({
       data: {
         categoryId: rest.categoryId,
         title: rest.title,
+        titleAr: rest.titleAr,
         slug,
         content: rest.content,
+        contentAr: rest.contentAr,
+        readTime,
         featuredImageUrl: rest.featuredImageUrl ?? undefined,
         published: rest.published ?? false,
       },
@@ -451,35 +503,31 @@ adminRouter.put(
   "/blogs/:id",
   requirePermission("blogs"),
   asyncHandler(async (req, res) => {
-    const body = blogWrite.partial().parse(req.body);
+    const body = blogWrite.parse(req.body);
     const existing = await prisma.blog.findUnique({ where: { id: req.params.id } });
     if (!existing) throw new HttpError(404, "Blog not found");
-    let slug = existing.slug;
-    if (body.title && !body.slug) {
-      slug = await uniqueSlug(body.title, async (s) => {
-        return Boolean(
-          await prisma.blog.findFirst({ where: { slug: s, NOT: { id: existing.id } } })
-        );
-      });
-    } else if (body.slug) {
-      const clash = await prisma.blog.findFirst({
-        where: { slug: body.slug, NOT: { id: existing.id } },
-      });
-      if (clash) throw new HttpError(409, "Slug already in use");
-      slug = body.slug;
-    }
+    const slug =
+      body.title === existing.title
+        ? existing.slug
+        : await uniqueSlug(body.title, async (s) => {
+            return Boolean(
+              await prisma.blog.findFirst({ where: { slug: s, NOT: { id: existing.id } } })
+            );
+          });
     const { tagIds, ...rest } = body;
+    const readTime = estimateBlogReadTimeMinutes(rest.content, rest.contentAr);
     await prisma.blog.update({
       where: { id: existing.id },
       data: {
-        ...(rest.categoryId !== undefined ? { categoryId: rest.categoryId } : {}),
-        ...(rest.title !== undefined ? { title: rest.title } : {}),
+        categoryId: rest.categoryId,
+        title: rest.title,
+        titleAr: rest.titleAr,
         slug,
-        ...(rest.content !== undefined ? { content: rest.content } : {}),
-        ...(rest.featuredImageUrl !== undefined
-          ? { featuredImageUrl: rest.featuredImageUrl }
-          : {}),
-        ...(rest.published !== undefined ? { published: rest.published } : {}),
+        content: rest.content,
+        contentAr: rest.contentAr,
+        readTime,
+        featuredImageUrl: rest.featuredImageUrl ?? undefined,
+        published: rest.published ?? false,
       },
     });
     if (tagIds) {
@@ -557,6 +605,7 @@ adminRouter.delete(
 /** Portfolio categories */
 const portfolioCatSchema = z.object({
   name: z.string().min(1).max(200),
+  nameAr: z.string().min(1).max(200),
   slug: z.string().min(1).max(200).optional(),
 });
 
@@ -583,7 +632,7 @@ adminRouter.post(
         );
       }));
     const row = await prisma.portfolioCategory.create({
-      data: { name: body.name, slug },
+      data: { name: body.name, nameAr: body.nameAr, slug },
     });
     res.status(201).json(row);
   })
@@ -593,13 +642,19 @@ adminRouter.put(
   "/portfolio-categories/:id",
   requirePermission("portfolios"),
   asyncHandler(async (req, res) => {
-    const body = portfolioCatSchema.partial().parse(req.body);
+    const body = portfolioCatSchema.parse(req.body);
     const existing = await prisma.portfolioCategory.findUnique({
       where: { id: req.params.id },
     });
     if (!existing) throw new HttpError(404, "Category not found");
     let slug = existing.slug;
-    if (body.name && !body.slug) {
+    if (body.slug) {
+      const clash = await prisma.portfolioCategory.findFirst({
+        where: { slug: body.slug, NOT: { id: existing.id } },
+      });
+      if (clash) throw new HttpError(409, "Slug already in use");
+      slug = body.slug;
+    } else {
       slug = await uniqueSlug(body.name, async (s) => {
         return Boolean(
           await prisma.portfolioCategory.findFirst({
@@ -607,17 +662,12 @@ adminRouter.put(
           })
         );
       });
-    } else if (body.slug) {
-      const clash = await prisma.portfolioCategory.findFirst({
-        where: { slug: body.slug, NOT: { id: existing.id } },
-      });
-      if (clash) throw new HttpError(409, "Slug already in use");
-      slug = body.slug;
     }
     const row = await prisma.portfolioCategory.update({
       where: { id: existing.id },
       data: {
-        ...(body.name !== undefined ? { name: body.name } : {}),
+        name: body.name,
+        nameAr: body.nameAr,
         slug,
       },
     });
@@ -638,8 +688,10 @@ adminRouter.delete(
 const portfolioWrite = z.object({
   categoryId: z.string(),
   title: z.string().min(1).max(300),
+  titleAr: z.string().min(1).max(300),
   slug: z.string().min(1).max(320).optional(),
-  shortDescription: z.string().min(1).max(2000),
+  shortDescription: z.string().min(1).max(2000).transform(normalizeMultiline),
+  shortDescriptionAr: z.string().min(1).max(2000).transform(normalizeMultiline),
   featuredImageUrl: z.string().max(2048).optional().nullable(),
   link: z.string().max(2048).optional().nullable(),
   tagIds: z.array(z.string()).optional(),
@@ -675,8 +727,10 @@ adminRouter.post(
       data: {
         categoryId: rest.categoryId,
         title: rest.title,
+        titleAr: rest.titleAr,
         slug,
         shortDescription: rest.shortDescription,
+        shortDescriptionAr: rest.shortDescriptionAr,
         featuredImageUrl: rest.featuredImageUrl ?? undefined,
         link: rest.link ?? undefined,
       },
@@ -702,13 +756,19 @@ adminRouter.put(
   "/portfolios/:id",
   requirePermission("portfolios"),
   asyncHandler(async (req, res) => {
-    const body = portfolioWrite.partial().parse(req.body);
+    const body = portfolioWrite.parse(req.body);
     const existing = await prisma.portfolio.findUnique({
       where: { id: req.params.id },
     });
     if (!existing) throw new HttpError(404, "Portfolio not found");
     let slug = existing.slug;
-    if (body.title && !body.slug) {
+    if (body.slug) {
+      const clash = await prisma.portfolio.findFirst({
+        where: { slug: body.slug, NOT: { id: existing.id } },
+      });
+      if (clash) throw new HttpError(409, "Slug already in use");
+      slug = body.slug;
+    } else {
       slug = await uniqueSlug(body.title, async (s) => {
         return Boolean(
           await prisma.portfolio.findFirst({
@@ -716,27 +776,19 @@ adminRouter.put(
           })
         );
       });
-    } else if (body.slug) {
-      const clash = await prisma.portfolio.findFirst({
-        where: { slug: body.slug, NOT: { id: existing.id } },
-      });
-      if (clash) throw new HttpError(409, "Slug already in use");
-      slug = body.slug;
     }
     const { tagIds, ...rest } = body;
     await prisma.portfolio.update({
       where: { id: existing.id },
       data: {
-        ...(rest.categoryId !== undefined ? { categoryId: rest.categoryId } : {}),
-        ...(rest.title !== undefined ? { title: rest.title } : {}),
+        categoryId: rest.categoryId,
+        title: rest.title,
+        titleAr: rest.titleAr,
         slug,
-        ...(rest.shortDescription !== undefined
-          ? { shortDescription: rest.shortDescription }
-          : {}),
-        ...(rest.featuredImageUrl !== undefined
-          ? { featuredImageUrl: rest.featuredImageUrl }
-          : {}),
-        ...(rest.link !== undefined ? { link: rest.link } : {}),
+        shortDescription: rest.shortDescription,
+        shortDescriptionAr: rest.shortDescriptionAr,
+        featuredImageUrl: rest.featuredImageUrl ?? undefined,
+        link: rest.link ?? undefined,
       },
     });
     if (tagIds) {
@@ -771,9 +823,12 @@ adminRouter.delete(
 /** Testimonials */
 const testimonialSchema = z.object({
   name: z.string().min(1).max(200),
+  nameAr: z.string().min(1).max(200),
   position: z.string().max(200).optional().nullable(),
+  positionAr: z.string().min(1).max(200).transform(normalizeMultiline),
   rate: z.number().int().min(1).max(5),
-  content: z.string().min(1).max(10_000),
+  content: z.string().min(1).max(10_000).transform(normalizeMultiline),
+  contentAr: z.string().min(1).max(10_000).transform(normalizeMultiline),
   imageUrl: z.string().max(2048).optional().nullable(),
 });
 
@@ -801,10 +856,21 @@ adminRouter.put(
   "/testimonials/:id",
   requirePermission("testimonials"),
   asyncHandler(async (req, res) => {
-    const body = testimonialSchema.partial().parse(req.body);
+    const existing = await prisma.testimonial.findUnique({ where: { id: req.params.id } });
+    if (!existing) throw new HttpError(404, "Testimonial not found");
+    const body = testimonialSchema.parse(req.body);
     const row = await prisma.testimonial.update({
-      where: { id: req.params.id },
-      data: body,
+      where: { id: existing.id },
+      data: {
+        name: body.name,
+        nameAr: body.nameAr,
+        position: body.position ?? null,
+        positionAr: body.positionAr,
+        rate: body.rate,
+        content: body.content,
+        contentAr: body.contentAr,
+        imageUrl: body.imageUrl ?? null,
+      },
     });
     res.json(row);
   })
@@ -822,6 +888,7 @@ adminRouter.delete(
 /** Service categories */
 const serviceCatSchema = z.object({
   name: z.string().min(1).max(200),
+  nameAr: z.string().min(1).max(200),
   slug: z.string().min(1).max(200).optional(),
 });
 
@@ -848,7 +915,7 @@ adminRouter.post(
         );
       }));
     const row = await prisma.serviceCategory.create({
-      data: { name: body.name, slug },
+      data: { name: body.name, nameAr: body.nameAr, slug },
     });
     res.status(201).json(row);
   })
@@ -858,13 +925,19 @@ adminRouter.put(
   "/service-categories/:id",
   requirePermission("services"),
   asyncHandler(async (req, res) => {
-    const body = serviceCatSchema.partial().parse(req.body);
+    const body = serviceCatSchema.parse(req.body);
     const existing = await prisma.serviceCategory.findUnique({
       where: { id: req.params.id },
     });
     if (!existing) throw new HttpError(404, "Category not found");
     let slug = existing.slug;
-    if (body.name && !body.slug) {
+    if (body.slug) {
+      const clash = await prisma.serviceCategory.findFirst({
+        where: { slug: body.slug, NOT: { id: existing.id } },
+      });
+      if (clash) throw new HttpError(409, "Slug already in use");
+      slug = body.slug;
+    } else {
       slug = await uniqueSlug(body.name, async (s) => {
         return Boolean(
           await prisma.serviceCategory.findFirst({
@@ -872,17 +945,12 @@ adminRouter.put(
           })
         );
       });
-    } else if (body.slug) {
-      const clash = await prisma.serviceCategory.findFirst({
-        where: { slug: body.slug, NOT: { id: existing.id } },
-      });
-      if (clash) throw new HttpError(409, "Slug already in use");
-      slug = body.slug;
     }
     const row = await prisma.serviceCategory.update({
       where: { id: existing.id },
       data: {
-        ...(body.name !== undefined ? { name: body.name } : {}),
+        name: body.name,
+        nameAr: body.nameAr,
         slug,
       },
     });
@@ -900,11 +968,21 @@ adminRouter.delete(
 );
 
 /** Services */
+const iconifyIconField = z
+  .string()
+  .min(1)
+  .max(128)
+  .refine(isIconifyIconId, {
+    message: 'Icon must be an Iconify id (e.g. "mdi:web", "lucide:settings")',
+  });
+
 const serviceWrite = z.object({
   categoryId: z.string(),
   title: z.string().min(1).max(300),
-  description: z.string().min(1),
-  iconUrl: z.string().max(2048).optional().nullable(),
+  titleAr: z.string().min(1).max(300),
+  description: z.string().min(1).transform(normalizeMultiline),
+  descriptionAr: z.string().min(1).transform(normalizeMultiline),
+  icon: iconifyIconField,
 });
 
 adminRouter.get(
@@ -924,7 +1002,16 @@ adminRouter.post(
   requirePermission("services"),
   asyncHandler(async (req, res) => {
     const body = serviceWrite.parse(req.body);
-    const row = await prisma.service.create({ data: body });
+    const row = await prisma.service.create({
+      data: {
+        categoryId: body.categoryId,
+        title: body.title,
+        titleAr: body.titleAr,
+        description: body.description,
+        descriptionAr: body.descriptionAr,
+        icon: body.icon,
+      },
+    });
     res.status(201).json(row);
   })
 );
@@ -933,10 +1020,19 @@ adminRouter.put(
   "/services/:id",
   requirePermission("services"),
   asyncHandler(async (req, res) => {
-    const body = serviceWrite.partial().parse(req.body);
+    const body = serviceWrite.parse(req.body);
+    const existing = await prisma.service.findUnique({ where: { id: req.params.id } });
+    if (!existing) throw new HttpError(404, "Service not found");
     const row = await prisma.service.update({
-      where: { id: req.params.id },
-      data: body,
+      where: { id: existing.id },
+      data: {
+        categoryId: body.categoryId,
+        title: body.title,
+        titleAr: body.titleAr,
+        description: body.description,
+        descriptionAr: body.descriptionAr,
+        icon: body.icon,
+      },
     });
     res.json(row);
   })
@@ -954,9 +1050,12 @@ adminRouter.delete(
 /** Packages */
 const packageSchema = z.object({
   name: z.string().min(1).max(200),
-  shortDescription: z.string().min(1).max(2000),
+  nameAr: z.string().min(1).max(200),
+  shortDescription: z.string().min(1).max(2000).transform(normalizeMultiline),
+  shortDescriptionAr: z.string().min(1).max(2000).transform(normalizeMultiline),
   price: z.coerce.number().nonnegative(),
-  privileges: z.array(z.string().min(1)).min(1),
+  privileges: z.array(z.string().min(1).transform(normalizeMultiline)).min(1),
+  privilegesAr: z.array(z.string().min(1).transform(normalizeMultiline)).min(1),
   sortOrder: z.number().int().optional(),
 });
 
@@ -979,9 +1078,12 @@ adminRouter.post(
     const row = await prisma.package.create({
       data: {
         name: body.name,
+        nameAr: body.nameAr,
         shortDescription: body.shortDescription,
+        shortDescriptionAr: body.shortDescriptionAr,
         price: body.price,
         privileges: body.privileges,
+        privilegesAr: body.privilegesAr,
         sortOrder: body.sortOrder ?? 0,
       },
     });
@@ -993,19 +1095,20 @@ adminRouter.put(
   "/packages/:id",
   requirePermission("packages"),
   asyncHandler(async (req, res) => {
-    const body = packageSchema.partial().parse(req.body);
+    const existing = await prisma.package.findUnique({ where: { id: req.params.id } });
+    if (!existing) throw new HttpError(404, "Package not found");
+    const body = packageSchema.parse(req.body);
     const row = await prisma.package.update({
-      where: { id: req.params.id },
+      where: { id: existing.id },
       data: {
-        ...(body.name !== undefined ? { name: body.name } : {}),
-        ...(body.shortDescription !== undefined
-          ? { shortDescription: body.shortDescription }
-          : {}),
-        ...(body.price !== undefined ? { price: body.price } : {}),
-        ...(body.privileges !== undefined
-          ? { privileges: body.privileges }
-          : {}),
-        ...(body.sortOrder !== undefined ? { sortOrder: body.sortOrder } : {}),
+        name: body.name,
+        nameAr: body.nameAr,
+        shortDescription: body.shortDescription,
+        shortDescriptionAr: body.shortDescriptionAr,
+        price: body.price,
+        privileges: body.privileges,
+        privilegesAr: body.privilegesAr,
+        sortOrder: body.sortOrder ?? existing.sortOrder,
       },
     });
     res.json(row);

@@ -1,6 +1,7 @@
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
-import { ImageUploadField } from "../../components/ImageUploadField";
+import { MultilineTextArea } from "../../components/MultilineTextArea";
+import { IconifyIconPicker } from "../../components/IconifyIconPicker";
 import { FormSection } from "../../components/ui";
 
 export const ServiceEdit = () => {
@@ -14,19 +15,25 @@ export const ServiceEdit = () => {
     <Edit saveButtonProps={saveButtonProps} isLoading={query?.isLoading ?? false}>
       <FormSection
         title="Edit Service"
-        description="Refine service information and icon presentation."
+        description="Update service content and Iconify icon."
       >
         <Form {...formProps} layout="vertical">
           <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
             <Select {...selectProps} />
           </Form.Item>
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+          <Form.Item name="title" label="Title (English)" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="description" label="Description" rules={[{ required: true }]}>
-            <Input.TextArea rows={6} />
+          <Form.Item name="titleAr" label="Title (Arabic)" rules={[{ required: true }]}>
+            <Input />
           </Form.Item>
-          <ImageUploadField form={form} fieldName="iconUrl" label="Icon image" folder="services" />
+          <Form.Item name="description" label="Description (English)" rules={[{ required: true }]}>
+            <MultilineTextArea rows={6} />
+          </Form.Item>
+          <Form.Item name="descriptionAr" label="Description (Arabic)" rules={[{ required: true }]}>
+            <MultilineTextArea rows={6} />
+          </Form.Item>
+          <IconifyIconPicker form={form} fieldName="icon" label="Icon (Iconify)" />
         </Form>
       </FormSection>
     </Edit>
