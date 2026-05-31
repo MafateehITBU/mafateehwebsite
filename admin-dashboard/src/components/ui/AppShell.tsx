@@ -31,6 +31,28 @@ type MenuItem = {
   icon: ReactNode;
 };
 
+/** Sidebar order (logout is rendered separately at the bottom). */
+const SIDEBAR_MENU_ORDER = [
+  "dashboard",
+  "roles",
+  "admins",
+  "static_site_info",
+  "seo",
+  "portfolios",
+  "partners",
+  "testimonials",
+  "packages",
+  "services",
+  "blogs",
+  "contacts",
+  "privacy_policy",
+] as const;
+
+const sidebarMenuRank = (key: string) => {
+  const index = SIDEBAR_MENU_ORDER.indexOf(key as (typeof SIDEBAR_MENU_ORDER)[number]);
+  return index === -1 ? SIDEBAR_MENU_ORDER.length : index;
+};
+
 const iconMap: Record<string, ReactNode> = {
   dashboard: <DashboardOutlined />,
   static_site_info: <GlobalOutlined />,
@@ -134,7 +156,8 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
                 route: item.route ?? "/",
               }),
             }) as MenuItem,
-        ),
+        )
+        .sort((a, b) => sidebarMenuRank(a.key) - sidebarMenuRank(b.key)),
     [menuItems, permissionsLoading, permissionsData],
   );
 
