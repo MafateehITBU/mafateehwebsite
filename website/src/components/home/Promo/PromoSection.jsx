@@ -4,7 +4,7 @@ import { getHomeContent } from '../../../content/index.js'
 
 function PromoFeatureCard({ icon, lines }) {
   return (
-    <article className="promo-feature-card flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-3 py-6 text-center shadow-md sm:px-5 sm:py-7">
+    <article data-aos="flip-left" className="promo-feature-card flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-3 py-6 text-center shadow-md sm:px-5 sm:py-7">
       <Icon icon={icon} className="h-10 w-10 shrink-0 text-white sm:h-11 sm:w-11 lg:h-12 lg:w-12" aria-hidden />
       <p className="mt-3 font-body leading-snug text-white sm:mt-4">
         <span className="block text-base font-bold sm:text-lg">{lines[0]}</span>
@@ -28,7 +28,7 @@ export function PromoSection() {
         ].join(' ')}
         dir={isRtl ? 'rtl' : 'ltr'}
       >
-        <div className="relative flex flex-1 flex-col justify-center overflow-hidden rounded-2xl px-6 py-12 sm:px-10 sm:py-14 lg:max-w-[40%] lg:px-12 lg:py-16">
+        <div data-aos={isRtl? "slide-left" : "slide-right"} className="relative flex flex-1 flex-col justify-center overflow-hidden rounded-2xl px-6 py-12 sm:px-10 sm:py-14 lg:max-w-[40%] lg:px-12 lg:py-16">
           <div
             className="absolute inset-0 bg-primary/5 backdrop-blur-sm "
             aria-hidden
@@ -51,7 +51,7 @@ export function PromoSection() {
             </p>
             <div className="mt-2 flex w-full justify-center lg:justify-start">
               <a
-                href="#contact"
+                href="/contact"
                 className="inline-flex min-h-12 items-center justify-center rounded-lg border-2 border-white bg-secondary px-8 py-3 font-body text-[0.9375rem] font-semibold text-white transition-colors duration-200 hover:bg-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:text-[0.9375rem]"
               >
                 {promo.getStarted}

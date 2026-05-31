@@ -20,7 +20,7 @@ export const FOOTER_CONTENT = {
     nav: [
       { key: 'home', href: '/', label: 'Home' },
       { key: 'about', href: '/about', label: 'About Us' },
-      { key: 'packages', href: '/pricing', label: 'Packages' },
+      { key: 'packages', href: '/packages', label: 'Packages' },
       { key: 'blog', href: '/blogs', label: 'Blog' },
       { key: 'privacy', href: '/privacy-policy', label: 'Privacy Policy' },
     ],
@@ -54,7 +54,7 @@ export const FOOTER_CONTENT = {
     nav: [
       { key: 'home', href: '/', label: 'الرئيسية' },
       { key: 'about', href: '/about', label: 'من نحن' },
-      { key: 'packages', href: '/pricing', label: 'الباقات' },
+      { key: 'packages', href: '/packages', label: 'الباقات' },
       { key: 'blog', href: '/blogs', label: 'المدونة' },
       { key: 'privacy', href: '/privacy-policy', label: 'سياسة الخصوصية' },
     ],

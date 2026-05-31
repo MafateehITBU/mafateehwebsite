@@ -10,9 +10,30 @@ import { SiteBackground } from './SiteBackground.jsx'
  * CTA copy lives in `content/cta.js`; component is `CtaSection.jsx`.
  */
 
+const STATIC_ROUTES = new Set([
+  '/',
+  '/blogs',
+  '/privacy-policy',
+  '/about',
+  '/it-solutions',
+  '/digital-marketing',
+  '/branding',
+  '/packages',
+  '/contact',
+])
+
+/** @param {string} pathname */
+function isKnownRoute(pathname) {
+  if (STATIC_ROUTES.has(pathname)) return true
+  if (/^\/blogs\/[^/]+$/.test(pathname)) return true
+  return false
+}
+
 /** Return false on paths that should NOT show the shared CTA above the footer. */
 function shouldShowCta(pathname) {
+  if (!isKnownRoute(pathname)) return false
   if (pathname === '/') return false
+  if (pathname === '/contact') return false
   if (pathname === '/privacy-policy') return false
   if (pathname === '/blogs') return false
   if (pathname.startsWith('/blogs/')) return false

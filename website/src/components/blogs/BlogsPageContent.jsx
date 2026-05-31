@@ -175,7 +175,7 @@ export function BlogsPageContent() {
               </>
             ) : (
               <>
-                <div className="min-w-0">
+                <div className="min-w-0" data-aos={isRtl ? 'slide-left' : 'slide-right'}>
                   <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-6 lg:gap-7">
                     {visibleBlogs.map((blog) => (
                       <li key={String(blog.id)}>

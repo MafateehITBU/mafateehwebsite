@@ -57,7 +57,7 @@ export function BlogsSidebar({
   )
 
   return (
-    <aside className="flex flex-col gap-8 lg:gap-10" dir={isRtl ? 'rtl' : 'ltr'}>
+    <aside className="flex flex-col gap-8 lg:gap-10" dir={isRtl ? 'rtl' : 'ltr'} data-aos={isRtl ? 'slide-right' : 'slide-left'}>
       <div className="flex flex-col gap-2">
         <label htmlFor="blogs-search" className="sr-only">
           {copy.searchAria}

@@ -15,7 +15,7 @@ export function SolutionServicesGrid({ items }) {
   if (items.length === 0) return null
 
   return (
-    <ul className="mt-10 grid grid-cols-1 gap-6 sm:mt-12 md:grid-cols-3 md:gap-8">
+    <ul data-aos="fade-up" className="mt-10 grid grid-cols-1 gap-6 sm:mt-12 md:grid-cols-3 md:gap-8">
       {items.map((item, index) => (
         <li
           key={item.id}

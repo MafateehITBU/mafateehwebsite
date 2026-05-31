@@ -22,7 +22,7 @@ export function AboutStorySection() {
         </h2>
 
         <div className="mt-10 flex flex-col gap-10 lg:mt-14 lg:flex-row lg:items-center lg:gap-12 xl:gap-16">
-          <div className="flex flex-1 flex-col">
+          <div data-aos={isRtl? "slide-left" : "slide-right"} className="flex flex-1 flex-col">
             <h3 className="font-heading text-2xl font-bold leading-snug text-foreground sm:text-3xl">
               {copy.empowerBefore}{' '}
               <span className="text-secondary underline decoration-secondary decoration-2 underline-offset-4">
@@ -56,7 +56,7 @@ export function AboutStorySection() {
             </a>
           </div>
 
-          <div className="flex flex-1 justify-center lg:justify-end">
+          <div data-aos={isRtl? "slide-right" : "slide-left"} className="flex flex-1 justify-center lg:justify-end">
             <img
               src={about1}
               alt=""

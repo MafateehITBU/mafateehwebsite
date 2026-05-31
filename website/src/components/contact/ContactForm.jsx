@@ -92,7 +92,7 @@ export function ContactForm({ copy, locale }) {
   }
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'}>
+    <div data-aos={isRtl? "slide-left" : "slide-right"} dir={isRtl ? 'rtl' : 'ltr'}>
       <form
         className="contact-form-card blog-post-card-shadow rounded-xl bg-card p-5 sm:p-6 lg:p-7"
         onSubmit={handleSubmit}

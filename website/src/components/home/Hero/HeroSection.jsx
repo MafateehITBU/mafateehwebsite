@@ -16,7 +16,7 @@ export function HeroSection() {
       ].join(' ')
 
   return (
-    <section className="relative flex min-h-[calc(100dvh-4.5rem)] w-full items-center py-10 sm:min-h-[calc(100dvh-5rem)] sm:py-14">
+    <section data-aos={isRtl? "fade-right" : "fade-left"} className="relative flex min-h-[calc(100dvh-4.5rem)] w-full items-center py-10 sm:min-h-[calc(100dvh-5rem)] sm:py-14">
       <div dir={isRtl ? 'rtl' : 'ltr'} className={containerClass}>
         <h1 className="w-full font-heading text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
           {copy.title}
@@ -39,13 +39,13 @@ export function HeroSection() {
           ].join(' ')}
         >
           <a
-            href="#quotes"
+            href="/contact"
             className="inline-flex w-full items-center justify-center rounded-lg border-2 border-white bg-secondary px-6 py-3 font-body text-base font-semibold text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:w-auto md:min-w-[10.5rem]"
           >
             {copy.getQuotes}
           </a>
           <a
-            href="#contact"
+            href="/contact"
             className="inline-flex w-full items-center justify-center rounded-lg border-2 border-white bg-primary px-6 py-3 font-body text-base font-semibold text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-background dark:hover:bg-background/90 md:w-auto md:min-w-[10.5rem]"
           >
             {copy.getStarted}

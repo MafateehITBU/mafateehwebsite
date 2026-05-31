@@ -75,7 +75,7 @@ export function PortfolioSection() {
 
   return (
     <section className="section-solid py-14 sm:py-16 lg:py-20" aria-labelledby="portfolio-heading">
-      <div className="site-container">
+      <div className="site-container" data-aos="fade-up">
         <h2
           id="portfolio-heading"
           className="text-center font-heading text-3xl font-bold text-foreground sm:text-4xl"

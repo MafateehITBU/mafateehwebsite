@@ -30,7 +30,7 @@ export function CtaSection() {
           {copy.subtitle}
         </p>
         <a
-          href="#contact"
+          href="/contact"
           className="mt-1 inline-flex min-h-11 items-center justify-center rounded-lg border-2 border-white bg-secondary px-8 py-2.5 font-body text-sm font-semibold text-white transition-colors duration-300 hover:bg-transparent sm:text-base"
         >
           {copy.button}

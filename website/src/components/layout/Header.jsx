@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import logo from '../../assets/imgs/logo.png'
 import logoWhite from '../../assets/imgs/logo-white.png'
@@ -64,14 +64,14 @@ function navLinkClass(active) {
   return `${base} border-transparent text-foreground/90 hover:border-primary hover:text-primary dark:hover:border-secondary dark:hover:text-secondary`
 }
 
-/** Full-screen mobile menu: underline + primary on active/hover. */
+/** Full-screen mobile menu: active item white + bold; others muted white. */
 function mobileMenuNavLinkClass(active) {
   const base =
-    'inline-block font-body text-lg font-medium transition-colors border-b-2 pb-1'
+    'inline-block font-body text-lg transition-colors border-b-2 pb-1'
   if (active) {
-    return `${base} border-primary text-primary`
+    return `${base} border-white font-bold text-white`
   }
-  return `${base} border-transparent text-white/90 hover:border-primary hover:text-primary`
+  return `${base} border-transparent font-medium text-white/75 hover:border-white/50 hover:text-white`
 }
 
 /** Language flag, Contact us, and theme toggle (desktop header). */
@@ -113,11 +113,25 @@ export function Header() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuId = useId()
+  const menuPanelRef = useRef(/** @type {HTMLElement | null} */ (null))
+  const menuToggleRef = useRef(/** @type {HTMLButtonElement | null} */ (null))
   const isRtl = locale === 'ar'
   const contactLabel = isRtl ? 'تواصل معنا' : 'Contact us'
   const languagesLabel = isRtl ? 'اللغات' : 'Languages'
 
-  const closeMenu = useCallback(() => setMenuOpen(false), [])
+  const closeMenu = useCallback(() => {
+    const active = document.activeElement
+    if (
+      active instanceof HTMLElement &&
+      menuPanelRef.current?.contains(active)
+    ) {
+      active.blur()
+    }
+    setMenuOpen(false)
+    requestAnimationFrame(() => {
+      menuToggleRef.current?.focus()
+    })
+  }, [])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -138,8 +152,12 @@ export function Header() {
     typeof document !== 'undefined'
       ? createPortal(
           <aside
+            ref={menuPanelRef}
             id={menuId}
+            role="dialog"
+            aria-modal={menuOpen}
             aria-hidden={!menuOpen}
+            inert={!menuOpen}
             style={{ backgroundColor: MOBILE_MENU_BG }}
             className={`mobile-menu-panel fixed inset-0 z-[110] flex h-dvh min-h-dvh flex-col md:hidden ${
               menuOpen ? 'mobile-menu-panel--open' : ''
@@ -223,7 +241,7 @@ export function Header() {
                   />
                 </button>
                 <a
-                  href="#contact"
+                  href="/contact"
                   className="mt-8 flex w-full items-center justify-center rounded-lg bg-secondary px-6 py-3.5 font-body text-base font-semibold text-white shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
                   tabIndex={menuOpen ? 0 : -1}
                   onClick={closeMenu}
@@ -307,12 +325,13 @@ export function Header() {
             <div className="flex shrink-0 items-center gap-2 md:hidden">
               <ThemeToggle tabIndex={0} />
               <button
+                ref={menuToggleRef}
                 type="button"
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-card text-foreground transition hover:border-primary/40"
                 aria-expanded={menuOpen}
                 aria-controls={menuId}
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                onClick={() => setMenuOpen((o) => !o)}
+                onClick={() => (menuOpen ? closeMenu() : setMenuOpen(true))}
               >
                 <IconMenu className="h-5 w-5" />
               </button>

@@ -2,6 +2,8 @@
 
 /** @typedef {{ label: string; percent: number }} SkillItem */
 
+/** @typedef {{ label: string; href: string }} CapabilityOrbitItem */
+
 /** @typedef {Object} HomeLocaleContent
  * @property {Object} hero
  * @property {string} hero.title
@@ -17,6 +19,11 @@
  * @property {string} company.title
  * @property {string} company.subtitle
  * @property {SkillItem[]} company.skills
+ * @property {Object} company.capabilities
+ * @property {string} company.capabilities.label
+ * @property {string} company.capabilities.ctaLabel
+ * @property {string} company.capabilities.ctaHref
+ * @property {CapabilityOrbitItem[]} company.capabilities.items
  * @property {Object} promo
  * @property {string} promo.heading
  * @property {string} promo.subtitle
@@ -121,6 +128,17 @@ export const HOME_CONTENT = {
         { label: 'Web Development', percent: 75 },
         { label: 'UX Design', percent: 70 },
       ],
+      capabilities: {
+        label: 'Connected Capabilities',
+        ctaLabel: 'Connected Capabilities',
+        ctaHref: '/#services',
+        items: [
+          { label: '24/7\nContinuous Support and Follow-up', href: '/contact' },
+          { label: '360°\nIntegrated Digital Solutions', href: '/digital-marketing' },
+          { label: '+AI\nSmart Technologies Powered by AI', href: '/it-solutions' },
+          { label: 'UX/UI\nTransformative User Experiences', href: '/branding' },
+        ],
+      },
     },
     promo: {
       heading: 'Years of Experience. Results That Speak for Themselves.',
@@ -255,6 +273,17 @@ export const HOME_CONTENT = {
         { label: 'تطوير المواقع', percent: 75 },
         { label: 'تصميم تجربة المستخدم', percent: 70 },
       ],
+      capabilities: {
+        label: 'قدرات متصلة',
+        ctaLabel: 'قدرات متصلة',
+        ctaHref: '/#services',
+        items: [
+          { label: '24/7\nدعم ومتابعة مستمرة', href: '/contact' },
+          { label: '360°\nحلول رقمية متكاملة', href: '/digital-marketing' },
+          { label: '+AI\nتقنيات ذكية مدعومة بالذكاء الاصطناعي', href: '/it-solutions' },
+          { label: 'UX/UI\nتجارب استخدام مصممة للتحويل', href: '/branding' },
+        ],
+      },
     },
     promo: {
       heading: 'سنوات من الخبرة… ونتائج تتحدث عن نفسها',

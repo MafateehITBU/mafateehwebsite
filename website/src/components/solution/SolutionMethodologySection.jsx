@@ -31,7 +31,7 @@ export function SolutionMethodologySection({ pageKey }) {
       dir={isRtl ? 'rtl' : 'ltr'}
       aria-labelledby="solution-methodology-heading"
     >
-      <div className="site-container text-center">
+      <div data-aos="fade-up" className="site-container text-center">
         <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-secondary sm:text-sm">
           {copy.methodologyLabel}
         </p>

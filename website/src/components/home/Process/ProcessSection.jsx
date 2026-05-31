@@ -12,7 +12,7 @@ export function ProcessSection() {
 
   return (
     <section className="section-solid py-16 sm:py-20 lg:py-24" aria-labelledby="process-heading">
-      <div className="site-container">
+      <div className="site-container" data-aos="fade-up">
         <h2
           id="process-heading"
           className="text-center font-heading text-3xl font-bold text-foreground sm:text-4xl"

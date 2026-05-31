@@ -22,7 +22,7 @@ export function SolutionHighlightSection({ pageKey }) {
     >
       <div className="site-container">
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:justify-center lg:gap-8  xl:gap-10">
-          <div className="w-full max-w-2xl rounded-2xl bg-white/10 p-6 backdrop-blur-sm sm:p-8">
+          <div data-aos="zoom-in" className="w-full max-w-2xl rounded-2xl bg-white/10 p-6 backdrop-blur-sm sm:p-8">
             <h2
               id="solution-highlight-heading"
               className="font-heading text-2xl font-bold leading-snug sm:text-3xl"
@@ -50,7 +50,7 @@ export function SolutionHighlightSection({ pageKey }) {
             </ul>
           </div>
 
-          <div className="mx-auto grid w-full max-w-[22rem] grid-cols-2 gap-4 sm:max-w-[26rem] sm:gap-5 lg:mx-0 lg:ms-auto lg:max-w-[30rem] xl:max-w-[32rem]">
+          <div data-aos="zoom-in" className="mx-auto grid w-full max-w-[22rem] grid-cols-2 gap-4 sm:max-w-[26rem] sm:gap-5 lg:mx-0 lg:ms-auto lg:max-w-[30rem] xl:max-w-[32rem]">
             <div className="flex flex-col gap-4 sm:gap-5">
               {rect0 ? (
                 <HighlightTile
