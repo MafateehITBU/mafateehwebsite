@@ -8,9 +8,33 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      PROD_HOST: ${{ secrets.PROD_HOST }}
+      PROD_USER: ${{ secrets.PROD_USER }}
+      PROD_APP_DIR: ${{ secrets.PROD_APP_DIR }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate deploy secrets
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in PROD_HOST PROD_USER PROD_APP_DIR PROD_SSH_PRIVATE_KEY; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::Missing secret: $name"
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+          if [[ "$PROD_APP_DIR" != /* ]]; then
+            echo "::error::PROD_APP_DIR must be an absolute path (example: /opt/mafateehwebsite)"
+            exit 1
+          fi
+        env:
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
 
       - name: Start ssh-agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -20,19 +44,21 @@ jobs:
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$PROD_HOST" >> ~/.ssh/known_hosts
 
       - name: Sync project to server
         run: |
+          set -euo pipefail
           rsync -az --delete \
             --exclude ".git" \
             --exclude "node_modules" \
             --exclude "backend/node_modules" \
             --exclude "website/node_modules" \
             --exclude "admin-dashboard/node_modules" \
-            ./ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_APP_DIR }}/
+            --exclude "backend/.env" \
+            "./" "${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
 
       - name: Deploy on server
         run: |
-          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} \
-            "cd ${{ secrets.PROD_APP_DIR }} && bash deploy/scripts/deploy.sh"
+          set -euo pipefail
+          ssh "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && bash deploy/scripts/deploy.sh"
