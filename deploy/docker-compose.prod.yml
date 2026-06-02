@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ./deploy/config/postgres.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./deploy/config/backend.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "4000"
+
+  website:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: https://api.mafateehgroup.com/api
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  dashboard:
+    build:
+      context: ./admin-dashboard
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - website
+      - dashboard
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./deploy/certbot/www:/var/www/certbot
+      - ./deploy/certbot/conf:/etc/letsencrypt
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./deploy/certbot/www:/var/www/certbot
+      - ./deploy/certbot/conf:/etc/letsencrypt
+
+volumes:
+  pg_data:

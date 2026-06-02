@@ -1,0 +1,38 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync project to server
+        run: |
+          rsync -az --delete \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude "backend/node_modules" \
+            --exclude "website/node_modules" \
+            --exclude "admin-dashboard/node_modules" \
+            ./ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_APP_DIR }}/
+
+      - name: Deploy on server
+        run: |
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} \
+            "cd ${{ secrets.PROD_APP_DIR }} && bash deploy/scripts/deploy.sh"
