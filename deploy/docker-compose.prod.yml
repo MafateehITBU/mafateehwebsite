@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     env_file:
-      - ./deploy/config/postgres.env
+      - ./config/postgres.env
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,11 +14,11 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
-      - ./deploy/config/backend.env
+      - ./config/backend.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -27,7 +27,7 @@ services:
 
   website:
     build:
-      context: ./website
+      context: ../website
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: https://api.mafateehgroup.com/api
@@ -37,7 +37,7 @@ services:
 
   dashboard:
     build:
-      context: ./admin-dashboard
+      context: ../admin-dashboard
       dockerfile: Dockerfile
     restart: unless-stopped
     expose:
@@ -54,15 +54,15 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./deploy/certbot/www:/var/www/certbot
-      - ./deploy/certbot/conf:/etc/letsencrypt
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
 
   certbot:
     image: certbot/certbot:latest
     volumes:
-      - ./deploy/certbot/www:/var/www/certbot
-      - ./deploy/certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
 
 volumes:
   pg_data:
