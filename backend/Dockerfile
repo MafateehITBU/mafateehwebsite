@@ -8,7 +8,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time only: prisma generate + tsc do not need a live database.
 ENV NODE_ENV=production
 ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=build
@@ -29,7 +28,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/generated ./dist/generated
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/scripts ./scripts
 
 EXPOSE 4000
-CMD ["sh", "-c", "npm run db:deploy && npm run start"]
+CMD ["node", "dist/index.js"]

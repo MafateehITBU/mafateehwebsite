@@ -59,7 +59,7 @@ jobs:
             --exclude "deploy/config/backend.env" \
             --exclude "deploy/config/postgres.env" \
             --exclude "deploy/certbot/conf" \
-            --exclude "deploy/nginx/conf.d/default.conf" \
+            --exclude "deploy/nginx/conf.d/" \
             "./" "${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
 
       - name: Deploy on server
