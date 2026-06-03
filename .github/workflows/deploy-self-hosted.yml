@@ -1,0 +1,38 @@
+name: Deploy Production (self-hosted)
+
+# Enable this file AFTER installing the runner on the VPS.
+# Rename or delete deploy-production.yml fail-fast job when enabling.
+
+# Do not enable push until runner is installed — use workflow_dispatch to test.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync to app directory
+        run: |
+          set -euo pipefail
+          rsync -az --delete \
+            --filter='protect deploy/certbot/' \
+            --filter='protect deploy/config/backend.env' \
+            --filter='protect deploy/config/postgres.env' \
+            --filter='protect deploy/nginx/conf.d/' \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude "backend/node_modules" \
+            --exclude "website/node_modules" \
+            --exclude "admin-dashboard/node_modules" \
+            --exclude "backend/.env" \
+            --exclude "deploy/certbot/" \
+            --exclude "deploy/config/backend.env" \
+            --exclude "deploy/config/postgres.env" \
+            --exclude "deploy/nginx/conf.d/" \
+            "./" "/opt/mafateehwebsite/"
+
+      - name: Deploy
+        run: bash /opt/mafateehwebsite/deploy/scripts/deploy.sh

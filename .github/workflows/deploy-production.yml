@@ -6,36 +6,44 @@ on:
       - main
   workflow_dispatch:
 
-# Runs ON the VPS (self-hosted runner). GitHub cloud runners cannot SSH to your
-# server because Hostinger blocks inbound port 22 from GitHub IP ranges.
+# STOP "Waiting for a runner": install the VPS runner once, then uncomment the
+# self-hosted job below and remove/disable the fail-fast job.
+#
+#   bash deploy/scripts/setup-github-runner.sh <TOKEN>
+#   https://github.com/MafateehITBU/mafateehwebsite/settings/actions/runners/new
+#
+# Until then, use git pull on the server (after adding deploy key):
+#   bash deploy/scripts/setup-git-deploy.sh
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  # Remove this job after self-hosted runner is installed.
+  runner-not-installed:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Sync to app directory
+      - name: Self-hosted runner required
         run: |
-          set -euo pipefail
-          APP_DIR="/opt/mafateehwebsite"
-          rsync -az --delete \
-            --filter='protect deploy/certbot/' \
-            --filter='protect deploy/config/backend.env' \
-            --filter='protect deploy/config/postgres.env' \
-            --filter='protect deploy/nginx/conf.d/' \
-            --exclude ".git" \
-            --exclude "node_modules" \
-            --exclude "backend/node_modules" \
-            --exclude "website/node_modules" \
-            --exclude "admin-dashboard/node_modules" \
-            --exclude "backend/.env" \
-            --exclude "deploy/certbot/" \
-            --exclude "deploy/config/backend.env" \
-            --exclude "deploy/config/postgres.env" \
-            --exclude "deploy/nginx/conf.d/" \
-            "./" "${APP_DIR}/"
+          echo "::error::No self-hosted runner on this VPS — job would wait forever."
+          echo "::error::Install: ssh root@187.124.173.216 then bash deploy/scripts/setup-github-runner.sh TOKEN"
+          echo "::error::Or use git auto-deploy: add deploy key at https://github.com/MafateehITBU/mafateehwebsite/settings/keys/new then bash deploy/scripts/setup-git-deploy.sh"
+          exit 1
 
-      - name: Deploy
-        run: bash /opt/mafateehwebsite/deploy/scripts/deploy.sh
+  # Uncomment after runner shows Idle in GitHub → Settings → Actions → Runners
+  # deploy:
+  #   runs-on: self-hosted
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Sync to app directory
+  #       run: |
+  #         set -euo pipefail
+  #         rsync -az --delete \
+  #           --filter='protect deploy/certbot/' \
+  #           --filter='protect deploy/config/backend.env' \
+  #           --filter='protect deploy/config/postgres.env' \
+  #           --filter='protect deploy/nginx/conf.d/' \
+  #           --exclude ".git" --exclude "node_modules" \
+  #           --exclude "backend/node_modules" --exclude "website/node_modules" \
+  #           --exclude "admin-dashboard/node_modules" --exclude "backend/.env" \
+  #           --exclude "deploy/certbot/" --exclude "deploy/config/backend.env" \
+  #           --exclude "deploy/config/postgres.env" --exclude "deploy/nginx/conf.d/" \
+  #           "./" "/opt/mafateehwebsite/"
+  #     - run: bash /opt/mafateehwebsite/deploy/scripts/deploy.sh
