@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -12,6 +13,7 @@ jobs:
       PROD_HOST: ${{ secrets.PROD_HOST }}
       PROD_USER: ${{ secrets.PROD_USER }}
       PROD_APP_DIR: ${{ secrets.PROD_APP_DIR }}
+      PROD_CERTBOT_EMAIL: ${{ secrets.PROD_CERTBOT_EMAIL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -65,4 +67,4 @@ jobs:
       - name: Deploy on server
         run: |
           set -euo pipefail
-          ssh "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && bash deploy/scripts/deploy.sh"
+          ssh "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && PROD_CERTBOT_EMAIL='${PROD_CERTBOT_EMAIL}' bash deploy/scripts/deploy.sh"

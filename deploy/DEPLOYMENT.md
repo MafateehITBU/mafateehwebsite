@@ -53,6 +53,7 @@ Add these GitHub Actions secrets in your private repo:
 - `PROD_USER` = `root`
 - `PROD_APP_DIR` = `/opt/mafateehwebsite`
 - `PROD_SSH_PRIVATE_KEY` = full content of `prod_deploy_key`
+- `PROD_CERTBOT_EMAIL` = (optional) your Let's Encrypt email for first-time SSL only
 
 ## 4) Initial files and env on server
 
