@@ -1019,11 +1019,27 @@ html.dark {
     border-top-color: rgba(255, 255, 255, 0.14);
   }
 
-  .privacy-policy-body.rich-html[dir='ltr'] {
+  .privacy-policy-body.rich-html[dir='ltr'],
+  .privacy-policy-body.rich-html[dir='ltr'] p,
+  .privacy-policy-body.rich-html[dir='ltr'] div,
+  .privacy-policy-body.rich-html[dir='ltr'] h1,
+  .privacy-policy-body.rich-html[dir='ltr'] h2,
+  .privacy-policy-body.rich-html[dir='ltr'] h3,
+  .privacy-policy-body.rich-html[dir='ltr'] h4,
+  .privacy-policy-body.rich-html[dir='ltr'] h5,
+  .privacy-policy-body.rich-html[dir='ltr'] h6 {
     text-align: left;
   }
 
-  .privacy-policy-body.rich-html[dir='rtl'] {
+  .privacy-policy-body.rich-html[dir='rtl'],
+  .privacy-policy-body.rich-html[dir='rtl'] p,
+  .privacy-policy-body.rich-html[dir='rtl'] div,
+  .privacy-policy-body.rich-html[dir='rtl'] h1,
+  .privacy-policy-body.rich-html[dir='rtl'] h2,
+  .privacy-policy-body.rich-html[dir='rtl'] h3,
+  .privacy-policy-body.rich-html[dir='rtl'] h4,
+  .privacy-policy-body.rich-html[dir='rtl'] h5,
+  .privacy-policy-body.rich-html[dir='rtl'] h6 {
     text-align: right;
   }
 

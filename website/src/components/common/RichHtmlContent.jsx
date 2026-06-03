@@ -23,7 +23,11 @@ export function RichHtmlContent({
 
   if (!looksLikeHtml(raw)) {
     return (
-      <MultilineText as={Tag === 'article' ? 'div' : Tag} className={className}>
+      <MultilineText
+        as={Tag === 'article' ? 'div' : Tag}
+        dir={dir}
+        className={className}
+      >
         {raw}
       </MultilineText>
     )

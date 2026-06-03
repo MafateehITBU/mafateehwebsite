@@ -45,7 +45,7 @@ export function PricingCard({ pkg, locale, isActive, requestQuoteLabel }) {
       ) : null}
 
       <a
-        href="#contact"
+        href="/contact"
         className="mx-auto mt-8 inline-flex min-h-10 w-auto items-center justify-center rounded-lg bg-secondary px-5 py-2 font-body text-sm font-semibold text-white transition-opacity hover:opacity-90"
       >
         {requestQuoteLabel}

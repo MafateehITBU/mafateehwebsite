@@ -49,11 +49,14 @@ export function PrivacyPolicy() {
     <>
       <Header />
       <main
-        className="section-solid site-container min-h-[50vh] px-10 py-12 sm:px-15 sm:py-16 md:px-30 lg:px-35"
+        className={[
+          'section-solid site-container min-h-[50vh] px-10 py-12 sm:px-15 sm:py-16 md:px-30 lg:px-35',
+          isRtl ? 'text-right' : 'text-left',
+        ].join(' ')}
         dir={isRtl ? 'rtl' : 'ltr'}
       >
         {loading ? (
-          <p className={`font-body text-foreground/70 ${isRtl ? 'text-right' : 'text-left'}`}>
+          <p className="font-body text-foreground/70">
             {locale === 'ar' ? 'جاري التحميل…' : 'Loading…'}
           </p>
         ) : null}
@@ -65,13 +68,13 @@ export function PrivacyPolicy() {
             dir={isRtl ? 'rtl' : 'ltr'}
             className={[
               'privacy-policy-body w-full max-w-3xl font-body text-base leading-relaxed text-foreground/90 sm:text-lg',
-              isRtl ? 'ms-auto text-right' : 'text-left',
+              isRtl ? 'me-auto' : '',
             ].join(' ')}
           />
         ) : null}
 
         {!loading && !bodyHtml ? (
-          <div className={['w-full max-w-3xl', isRtl ? 'ms-auto text-right' : 'text-left'].join(' ')}>
+          <div className={['w-full max-w-3xl', isRtl ? 'me-auto' : ''].join(' ')}>
             <h1 className="font-heading text-3xl font-bold text-foreground sm:text-4xl">
               {privacyNav?.label ?? 'Privacy Policy'}
             </h1>
