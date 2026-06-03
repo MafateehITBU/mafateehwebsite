@@ -1,49 +1,30 @@
 name: Deploy Production
 
+# Production deploy runs ON THE VPS (not from GitHub cloud).
+# GitHub cloud cannot SSH to your server (Hostinger blocks port 22).
+#
+# Setup once on server (choose one):
+#   A) Git auto-pull: add deploy key + bash deploy/scripts/setup-git-deploy.sh
+#   B) Self-hosted runner: bash deploy/scripts/setup-github-runner.sh TOKEN
+#
+# This workflow is informational only — it does not deploy.
+
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
-# STOP "Waiting for a runner": install the VPS runner once, then uncomment the
-# self-hosted job below and remove/disable the fail-fast job.
-#
-#   bash deploy/scripts/setup-github-runner.sh <TOKEN>
-#   https://github.com/MafateehITBU/mafateehwebsite/settings/actions/runners/new
-#
-# Until then, use git pull on the server (after adding deploy key):
-#   bash deploy/scripts/setup-git-deploy.sh
-
 jobs:
-  # Remove this job after self-hosted runner is installed.
-  runner-not-installed:
+  info:
     runs-on: ubuntu-latest
     steps:
-      - name: Self-hosted runner required
+      - name: Deploy runs on VPS
         run: |
-          echo "::error::No self-hosted runner on this VPS — job would wait forever."
-          echo "::error::Install: ssh root@187.124.173.216 then bash deploy/scripts/setup-github-runner.sh TOKEN"
-          echo "::error::Or use git auto-deploy: add deploy key at https://github.com/MafateehITBU/mafateehwebsite/settings/keys/new then bash deploy/scripts/setup-git-deploy.sh"
-          exit 1
-
-  # Uncomment after runner shows Idle in GitHub → Settings → Actions → Runners
-  # deploy:
-  #   runs-on: self-hosted
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Sync to app directory
-  #       run: |
-  #         set -euo pipefail
-  #         rsync -az --delete \
-  #           --filter='protect deploy/certbot/' \
-  #           --filter='protect deploy/config/backend.env' \
-  #           --filter='protect deploy/config/postgres.env' \
-  #           --filter='protect deploy/nginx/conf.d/' \
-  #           --exclude ".git" --exclude "node_modules" \
-  #           --exclude "backend/node_modules" --exclude "website/node_modules" \
-  #           --exclude "admin-dashboard/node_modules" --exclude "backend/.env" \
-  #           --exclude "deploy/certbot/" --exclude "deploy/config/backend.env" \
-  #           --exclude "deploy/config/postgres.env" --exclude "deploy/nginx/conf.d/" \
-  #           "./" "/opt/mafateehwebsite/"
-  #     - run: bash /opt/mafateehwebsite/deploy/scripts/deploy.sh
+          echo "Production deploy is configured on the VPS at /opt/mafateehwebsite"
+          echo ""
+          echo "Option A — Git auto-pull (every 3 min after setup):"
+          echo "  1. Add deploy key: https://github.com/MafateehITBU/mafateehwebsite/settings/keys/new"
+          echo "  2. ssh root@187.124.173.216"
+          echo "  3. bash /opt/mafateehwebsite/deploy/scripts/setup-git-deploy.sh"
+          echo ""
+          echo "Option B — Instant deploy via self-hosted runner:"
+          echo "  bash /opt/mafateehwebsite/deploy/scripts/setup-github-runner.sh TOKEN"
+          echo "  Then enable .github/workflows/deploy-self-hosted.yml push trigger"
