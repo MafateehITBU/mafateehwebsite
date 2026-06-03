@@ -6,8 +6,11 @@ APP_DIR="/opt/mafateehwebsite"
 KEY="/root/.ssh/github_deploy"
 REPO="git@github.com:MafateehITBU/mafateehwebsite.git"
 
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y git
+
+git config --global --add safe.directory "$APP_DIR"
 
 if [[ ! -f "$KEY" ]]; then
   ssh-keygen -t ed25519 -C "mafateeh-vps-deploy" -f "$KEY" -N ""
