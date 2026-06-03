@@ -53,7 +53,13 @@ Add these GitHub Actions secrets in your private repo:
 - `PROD_USER` = `root`
 - `PROD_APP_DIR` = `/opt/mafateehwebsite`
 - `PROD_SSH_PRIVATE_KEY` = full content of `prod_deploy_key`
-- `PROD_CERTBOT_EMAIL` = (optional) your Let's Encrypt email for first-time SSL only
+SSL is issued once on the server (not on every push):
+
+```bash
+bash deploy/scripts/issue-ssl.sh your@email.com
+```
+
+**Important:** `PROD_APP_DIR` must be exactly `/opt/mafateehwebsite` with **no extra line breaks** in the GitHub secret.
 
 ## 4) Initial files and env on server
 

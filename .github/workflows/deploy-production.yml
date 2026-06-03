@@ -13,17 +13,24 @@ jobs:
       PROD_HOST: ${{ secrets.PROD_HOST }}
       PROD_USER: ${{ secrets.PROD_USER }}
       PROD_APP_DIR: ${{ secrets.PROD_APP_DIR }}
-      PROD_CERTBOT_EMAIL: ${{ secrets.PROD_CERTBOT_EMAIL }}
+      PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate deploy secrets
+      - name: Normalize and validate secrets
         run: |
           set -euo pipefail
+          trim() { printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+
+          PROD_HOST="$(trim "$PROD_HOST")"
+          PROD_USER="$(trim "$PROD_USER")"
+          PROD_APP_DIR="$(trim "$PROD_APP_DIR")"
+
           missing=0
           for name in PROD_HOST PROD_USER PROD_APP_DIR PROD_SSH_PRIVATE_KEY; do
-            if [[ -z "${!name:-}" ]]; then
+            val="$(trim "${!name}")"
+            if [[ -z "$val" ]]; then
               echo "::error::Missing secret: $name"
               missing=1
             fi
@@ -32,11 +39,17 @@ jobs:
             exit 1
           fi
           if [[ "$PROD_APP_DIR" != /* ]]; then
-            echo "::error::PROD_APP_DIR must be an absolute path (example: /opt/mafateehwebsite)"
+            echo "::error::PROD_APP_DIR must be a single absolute path, e.g. /opt/mafateehwebsite (no quotes, no extra lines)"
             exit 1
           fi
-        env:
-          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+
+          {
+            echo "PROD_HOST=$PROD_HOST"
+            echo "PROD_USER=$PROD_USER"
+            echo "PROD_APP_DIR=$PROD_APP_DIR"
+          } >> "$GITHUB_ENV"
+
+          echo "Deploy target: ${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
 
       - name: Start ssh-agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -51,20 +64,25 @@ jobs:
       - name: Sync project to server
         run: |
           set -euo pipefail
+          DEST="${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
           rsync -az --delete \
+            --filter='protect deploy/certbot/' \
+            --filter='protect deploy/config/backend.env' \
+            --filter='protect deploy/config/postgres.env' \
+            --filter='protect deploy/nginx/conf.d/' \
             --exclude ".git" \
             --exclude "node_modules" \
             --exclude "backend/node_modules" \
             --exclude "website/node_modules" \
             --exclude "admin-dashboard/node_modules" \
             --exclude "backend/.env" \
+            --exclude "deploy/certbot/" \
             --exclude "deploy/config/backend.env" \
             --exclude "deploy/config/postgres.env" \
-            --exclude "deploy/certbot/conf" \
             --exclude "deploy/nginx/conf.d/" \
-            "./" "${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
+            "./" "$DEST"
 
       - name: Deploy on server
         run: |
           set -euo pipefail
-          ssh "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && PROD_CERTBOT_EMAIL='${PROD_CERTBOT_EMAIL}' bash deploy/scripts/deploy.sh"
+          ssh "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && bash deploy/scripts/deploy.sh"
