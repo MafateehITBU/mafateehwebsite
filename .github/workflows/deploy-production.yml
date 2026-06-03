@@ -6,84 +6,21 @@ on:
       - main
   workflow_dispatch:
 
+# Runs ON the VPS (self-hosted runner). GitHub cloud runners cannot SSH to your
+# server because Hostinger blocks inbound port 22 from GitHub IP ranges.
+
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    env:
-      PROD_HOST: ${{ secrets.PROD_HOST }}
-      PROD_USER: ${{ secrets.PROD_USER }}
-      PROD_APP_DIR: ${{ secrets.PROD_APP_DIR }}
-      PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-      SSH_OPTS: -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Normalize and validate secrets
+      - name: Sync to app directory
         run: |
           set -euo pipefail
-          trim() { printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
-
-          PROD_HOST="$(trim "$PROD_HOST")"
-          PROD_USER="$(trim "$PROD_USER")"
-          PROD_APP_DIR="$(trim "$PROD_APP_DIR")"
-
-          missing=0
-          for name in PROD_HOST PROD_USER PROD_APP_DIR PROD_SSH_PRIVATE_KEY; do
-            val="$(trim "${!name}")"
-            if [[ -z "$val" ]]; then
-              echo "::error::Missing secret: $name"
-              missing=1
-            fi
-          done
-          if [[ "$missing" -ne 0 ]]; then
-            exit 1
-          fi
-
-          if [[ "$PROD_APP_DIR" == "/" || ${#PROD_APP_DIR} -lt 10 ]]; then
-            echo "::error::PROD_APP_DIR looks wrong (length=${#PROD_APP_DIR}). Set it to: /opt/mafateehwebsite"
-            exit 1
-          fi
-          if [[ "$PROD_APP_DIR" != /* ]]; then
-            echo "::error::PROD_APP_DIR must be an absolute path: /opt/mafateehwebsite"
-            exit 1
-          fi
-          if [[ ! "$PROD_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::warning::PROD_HOST is not a plain IPv4 address; ssh-keyscan may behave differently"
-          fi
-
-          {
-            echo "PROD_HOST=$PROD_HOST"
-            echo "PROD_USER=$PROD_USER"
-            echo "PROD_APP_DIR=$PROD_APP_DIR"
-          } >> "$GITHUB_ENV"
-
-          echo "Deploy path length: ${#PROD_APP_DIR} chars (expect 20 for /opt/mafateehwebsite)"
-
-      - name: Start ssh-agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-
-      - name: Add server to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          if ! ssh-keyscan -4 -T 20 -H "$PROD_HOST" >> ~/.ssh/known_hosts 2>/dev/null; then
-            echo "::warning::ssh-keyscan failed; SSH will use accept-new for host key"
-          fi
-          chmod 644 ~/.ssh/known_hosts
-
-      - name: Test SSH connection
-        run: |
-          set -euo pipefail
-          ssh $SSH_OPTS "${PROD_USER}@${PROD_HOST}" "echo connected && test -d '${PROD_APP_DIR}' && echo app_dir_ok"
-
-      - name: Sync project to server
-        run: |
-          set -euo pipefail
-          DEST="${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
-          rsync -az --delete -e "ssh $SSH_OPTS" \
+          APP_DIR="/opt/mafateehwebsite"
+          rsync -az --delete \
             --filter='protect deploy/certbot/' \
             --filter='protect deploy/config/backend.env' \
             --filter='protect deploy/config/postgres.env' \
@@ -98,9 +35,7 @@ jobs:
             --exclude "deploy/config/backend.env" \
             --exclude "deploy/config/postgres.env" \
             --exclude "deploy/nginx/conf.d/" \
-            "./" "$DEST"
+            "./" "${APP_DIR}/"
 
-      - name: Deploy on server
-        run: |
-          set -euo pipefail
-          ssh $SSH_OPTS "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && bash deploy/scripts/deploy.sh"
+      - name: Deploy
+        run: bash /opt/mafateehwebsite/deploy/scripts/deploy.sh

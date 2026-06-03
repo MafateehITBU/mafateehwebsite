@@ -34,26 +34,30 @@ Create app path:
 mkdir -p /opt/mafateehwebsite
 ```
 
-## 3) GitHub Actions SSH key setup
+## 3) GitHub auto-deploy (self-hosted runner)
 
-Generate a deploy key pair locally:
+GitHub cloud runners **cannot SSH** to this VPS (Hostinger blocks inbound port 22 from GitHub).
+Use a **self-hosted runner** on the server instead.
+
+### One-time runner setup (on server)
+
+1. Open: https://github.com/MafateehITBU/mafateehwebsite/settings/actions/runners/new
+2. Choose **Linux** → copy the registration token (valid ~1 hour)
+3. On the server:
 
 ```bash
-ssh-keygen -t ed25519 -C "gh-actions-prod-deploy" -f ./prod_deploy_key
+cd /opt/mafateehwebsite
+bash deploy/scripts/setup-github-runner.sh YOUR_RUNNER_TOKEN
 ```
 
-Add public key to server:
+4. In GitHub → Runners, confirm **srv1719442** is **Idle**
 
-```bash
-ssh-copy-id -i ./prod_deploy_key.pub root@187.124.173.216
-```
+After that, every push to `main` runs deploy on the VPS (no SSH from GitHub needed).
 
-Add these GitHub Actions secrets in your private repo:
-- `PROD_HOST` = `187.124.173.216`
-- `PROD_USER` = `root`
-- `PROD_APP_DIR` = `/opt/mafateehwebsite`
-- `PROD_SSH_PRIVATE_KEY` = full content of `prod_deploy_key`
-SSL is issued once on the server (not on every push):
+### Optional SSH secrets (legacy cloud deploy — not used)
+
+If you ever open port 22 to GitHub IPs, you could use cloud runners with:
+- `PROD_HOST`, `PROD_USER`, `PROD_APP_DIR`, `PROD_SSH_PRIVATE_KEY`
 
 ```bash
 bash deploy/scripts/issue-ssl.sh your@email.com
