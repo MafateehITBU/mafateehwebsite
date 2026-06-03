@@ -11,6 +11,13 @@
       rel="stylesheet"
     />
     <title>Mafateeh</title>
+    <script>
+      try {
+        if (localStorage.getItem('mafateeh-theme') === 'dark') {
+          document.documentElement.classList.add('dark')
+        }
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
