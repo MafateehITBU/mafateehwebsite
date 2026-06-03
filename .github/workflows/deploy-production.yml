@@ -14,6 +14,7 @@ jobs:
       PROD_USER: ${{ secrets.PROD_USER }}
       PROD_APP_DIR: ${{ secrets.PROD_APP_DIR }}
       PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+      SSH_OPTS: -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,9 +39,17 @@ jobs:
           if [[ "$missing" -ne 0 ]]; then
             exit 1
           fi
-          if [[ "$PROD_APP_DIR" != /* ]]; then
-            echo "::error::PROD_APP_DIR must be a single absolute path, e.g. /opt/mafateehwebsite (no quotes, no extra lines)"
+
+          if [[ "$PROD_APP_DIR" == "/" || ${#PROD_APP_DIR} -lt 10 ]]; then
+            echo "::error::PROD_APP_DIR looks wrong (length=${#PROD_APP_DIR}). Set it to: /opt/mafateehwebsite"
             exit 1
+          fi
+          if [[ "$PROD_APP_DIR" != /* ]]; then
+            echo "::error::PROD_APP_DIR must be an absolute path: /opt/mafateehwebsite"
+            exit 1
+          fi
+          if [[ ! "$PROD_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::warning::PROD_HOST is not a plain IPv4 address; ssh-keyscan may behave differently"
           fi
 
           {
@@ -49,7 +58,7 @@ jobs:
             echo "PROD_APP_DIR=$PROD_APP_DIR"
           } >> "$GITHUB_ENV"
 
-          echo "Deploy target: ${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
+          echo "Deploy path length: ${#PROD_APP_DIR} chars (expect 20 for /opt/mafateehwebsite)"
 
       - name: Start ssh-agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -59,13 +68,22 @@ jobs:
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H "$PROD_HOST" >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          if ! ssh-keyscan -4 -T 20 -H "$PROD_HOST" >> ~/.ssh/known_hosts 2>/dev/null; then
+            echo "::warning::ssh-keyscan failed; SSH will use accept-new for host key"
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          set -euo pipefail
+          ssh $SSH_OPTS "${PROD_USER}@${PROD_HOST}" "echo connected && test -d '${PROD_APP_DIR}' && echo app_dir_ok"
 
       - name: Sync project to server
         run: |
           set -euo pipefail
           DEST="${PROD_USER}@${PROD_HOST}:${PROD_APP_DIR}/"
-          rsync -az --delete \
+          rsync -az --delete -e "ssh $SSH_OPTS" \
             --filter='protect deploy/certbot/' \
             --filter='protect deploy/config/backend.env' \
             --filter='protect deploy/config/postgres.env' \
@@ -85,4 +103,4 @@ jobs:
       - name: Deploy on server
         run: |
           set -euo pipefail
-          ssh "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && bash deploy/scripts/deploy.sh"
+          ssh $SSH_OPTS "${PROD_USER}@${PROD_HOST}" "cd '${PROD_APP_DIR}' && bash deploy/scripts/deploy.sh"
