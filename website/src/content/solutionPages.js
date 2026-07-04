@@ -56,18 +56,18 @@ export const SOLUTION_PAGES = {
       methodologySteps: [
         {
           number: '01',
-          title: 'Strategy & Research',
-          subtitle: 'We analyze your market, competitors, and audience behavior to build a data-driven marketing strategy aligned with your business goals.',
+          title: 'Analysis & Planning',
+          subtitle: "We assess your business needs, workflows, and technical requirements while designing intuitive UI/UX experiences to ensure the final solution is scalable, user-friendly, and aligned with your operational goals.",
         },
         {
           number: '02',
-          title: 'Campaign Execution',
-          subtitle: 'We launch targeted campaigns across SEO, paid ads, and social media with continuous optimization for maximum performance.',
+          title: 'Development & Integration',
+          subtitle: 'We build, customize, and integrate systems using modern technologies to ensure efficiency, performance, and seamless connectivity.',
         },
         {
           number: '03',
-          title: 'Optimization & Scaling',
-          subtitle: 'We monitor analytics, refine strategies, and scale high-performing channels to ensure sustainable long-term growth.',
+          title: 'Testing, Launch & Support',
+          subtitle: 'We thoroughly test, deploy, and continuously support your solution to ensure stability, security, and long-term success.',
         },
       ],
     },
@@ -94,18 +94,18 @@ export const SOLUTION_PAGES = {
       methodologySteps: [
         {
           number: '01',
-          title: 'الاستراتيجية والأبحاث',
-          subtitle: 'نقوم بتحليل السوق والمنافسين وسلوك الجمهور المستهدف لبناء استراتيجية تسويقية قائمة على البيانات ومتوافقة مع أهداف أعمالك.',
+          title: 'التحليل والتخطيط',
+          subtitle: 'نبدأ بفهم احتياجات أعمالك ودراسة العمليات والمتطلبات التقنية، مع تصميم واجهات وتجارب استخدام (UI/UX) تضمن أن يكون الحل النهائي سهل الاستخدام، قابلًا للتوسع، ومتوافقًا مع أهدافك التشغيلية.',
         },
         {
           number: '02',
-          title: 'تنفيذ الحملات',
-          subtitle: 'نُطلق حملات تسويقية موجهة عبر تحسين محركات البحث (SEO)، والإعلانات المدفوعة، ومنصات التواصل الاجتماعي، مع تحسين مستمر لضمان أعلى مستوى من الأداء.',
+          title: 'التطوير والتكامل',
+          subtitle: 'نقوم بتطوير الحلول التقنية وتخصيصها وربطها مع الأنظمة والمنصات المختلفة، لضمان كفاءة التشغيل وسلاسة تدفق البيانات بين جميع الأقسام.',
         },
         {
           number: '03',
-          title: 'تحسين وتوسيع',
-          subtitle: 'نراقب التحليلات والنتائج بشكل مستمر، ونطوّر الاستراتيجيات، ونعزز القنوات الأعلى أداءً لضمان نمو مستدام طويل الأمد.',
+          title: 'الاختبار والإطلاق والدعم',
+          subtitle: 'نختبر الأنظمة بدقة قبل الإطلاق، ثم نوفر الدعم والمتابعة المستمرة لضمان الاستقرار والأمان وتحقيق أفضل أداء على المدى الطويل.',
         },
       ],
     },
