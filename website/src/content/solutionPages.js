@@ -83,6 +83,7 @@ export const SOLUTION_PAGES = {
         { icon: 'material-symbols:rocket', text: 'التطوير عالي الأداء' },
         { icon: 'material-symbols:security', text: 'الحلول الأمنية المتقدمة'},
       ],
+      // Test
       rectangles: [
         { title: '99%', subtitle: 'أنظمة قابلة للتطوير وجاهزة للمستقبل' },
         { title: '50+', subtitle: 'مهندسين متخصصين' },
