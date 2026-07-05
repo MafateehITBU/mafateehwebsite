@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import type { Env } from "../config/env";
 import { env, smtpConfigured } from "../config/env";
 
 export type ContactEmailPayload = {
@@ -63,6 +64,31 @@ function buildContactEmailText(payload: ContactEmailPayload): string {
   ].join("\n");
 }
 
+/** Gmail SMTP requires the From address to match the authenticated account. */
+function resolveFromAddress(config: Env): string {
+  const custom = config.SMTP_FROM?.trim();
+  if (custom && custom.includes("@") && config.SMTP_USER && custom.includes(config.SMTP_USER)) {
+    return custom;
+  }
+  if (config.SMTP_USER) {
+    return `"Mafateeh Contact" <${config.SMTP_USER}>`;
+  }
+  return custom ?? "Mafateeh Contact <noreply@mafateeh.com>";
+}
+
+function createTransport(config: Env) {
+  return nodemailer.createTransport({
+    host: config.SMTP_HOST,
+    port: config.SMTP_PORT,
+    secure: config.SMTP_SECURE,
+    requireTLS: !config.SMTP_SECURE && config.SMTP_PORT === 587,
+    auth: {
+      user: config.SMTP_USER,
+      pass: config.SMTP_PASS,
+    },
+  });
+}
+
 export async function sendContactNotification(
   payload: ContactEmailPayload,
 ): Promise<void> {
@@ -80,20 +106,19 @@ export async function sendContactNotification(
   }
 
   const config = env();
-  const transporter = nodemailer.createTransport({
-    host: config.SMTP_HOST,
-    port: config.SMTP_PORT,
-    secure: config.SMTP_SECURE,
-    auth: {
-      user: config.SMTP_USER,
-      pass: config.SMTP_PASS,
-    },
-  });
+  const transporter = createTransport(config);
+  const from = resolveFromAddress(config);
 
-  await transporter.sendMail({
-    from: config.SMTP_FROM,
+  await transporter.verify();
+  const info = await transporter.sendMail({
+    from,
     to: recipients.join(", "),
     subject: "New contact form message — Mafateeh",
     text: buildContactEmailText(payload),
   });
+
+  // eslint-disable-next-line no-console
+  console.log(
+    `Contact notification email sent to ${recipients.length} recipient(s). messageId=${info.messageId ?? "n/a"}`,
+  );
 }

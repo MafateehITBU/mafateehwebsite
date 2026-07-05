@@ -1,7 +1,48 @@
+import fs from "fs";
+import path from "path";
 import { config } from "dotenv";
 import { z } from "zod";
 
 config();
+
+/** dotenv stops unquoted values at spaces — re-read SMTP keys from the env file. */
+function repairSmtpEnvFromFile(): void {
+  const keys = new Set([
+    "SMTP_HOST",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "SMTP_FROM",
+    "CONTACT_NOTIFY_TO",
+  ]);
+  const files = [
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "deploy/config/backend.env"),
+  ];
+
+  for (const file of files) {
+    if (!fs.existsSync(file)) continue;
+    const content = fs.readFileSync(file, "utf8");
+    for (const line of content.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      if (!keys.has(key)) continue;
+      let value = trimmed.slice(eq + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      process.env[key] = value;
+    }
+    return;
+  }
+}
+
+repairSmtpEnvFromFile();
 
 function resolveDatabaseUrl(): string {
   const pw = process.env.POSTGRES_PASSWORD;
@@ -18,7 +59,6 @@ function resolveDatabaseUrl(): string {
       "Set POSTGRES_PASSWORD or DATABASE_URL in backend/.env (see .env.example)."
     );
   }
-  // Template credentials almost never match a local pgAdmin install → P1000.
   if (url.includes("://postgres:postgres@")) {
     throw new Error(
       "PostgreSQL login failed because POSTGRES_PASSWORD is empty and DATABASE_URL still uses the default user postgres with password postgres. " +
@@ -50,8 +90,7 @@ const envSchema = z.object({
     .transform((value) => value === "true" || value === "1"),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().default("Mafateeh Contact <noreply@mafateeh.com>"),
-  /** Comma-separated inbox addresses for new contact form alerts. */
+  SMTP_FROM: z.string().optional(),
   CONTACT_NOTIFY_TO: z.string().optional(),
   CONTACT_DASHBOARD_URL: z
     .string()
@@ -84,4 +123,12 @@ export function cloudinaryConfigured(): boolean {
 export function smtpConfigured(): boolean {
   const e = env();
   return Boolean(e.SMTP_HOST && e.SMTP_USER && e.SMTP_PASS);
+}
+
+export function contactNotifyRecipientCount(): number {
+  const raw = env().CONTACT_NOTIFY_TO ?? "";
+  return raw
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean).length;
 }

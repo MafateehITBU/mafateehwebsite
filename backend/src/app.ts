@@ -1,7 +1,7 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
-import { env } from "./config/env";
+import { env, smtpConfigured, contactNotifyRecipientCount } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
 import { publicRouter } from "./routes/public.routes";
 import { adminRouter } from "./routes/admin/index";
@@ -22,7 +22,11 @@ const corsOrigin =
 app.use(cors({ origin: corsOrigin }));
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true });
+  res.json({
+    ok: true,
+    smtp: smtpConfigured(),
+    contactNotifyRecipients: contactNotifyRecipientCount(),
+  });
 });
 
 app.use("/api/public", publicRouter);
