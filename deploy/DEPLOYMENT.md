@@ -103,14 +103,22 @@ bash deploy/scripts/deploy.sh
 ## 6) Auto deploy on push
 
 Workflow file:
-- `.github/workflows/deploy-production.yml`
+- `.github/workflows/deploy-self-hosted.yml`
 
 Trigger:
-- Push to `main` branch.
+- Push to `main` (and manual **Run workflow** in GitHub Actions)
+
+Prerequisite:
+- Self-hosted runner installed and **Idle** at  
+  https://github.com/MafateehITBU/mafateehwebsite/settings/actions/runners
 
 What it does:
-1. Syncs repository files to server with `rsync`
-2. Runs `bash deploy/scripts/deploy.sh` on server
+1. Checks out the repo on the VPS runner
+2. Syncs files to `/opt/mafateehwebsite` with `rsync` (preserves server env + SSL)
+3. Runs `bash deploy/scripts/deploy.sh`
+
+Alternative (no GitHub runner): git auto-pull every 3 minutes —  
+`bash deploy/scripts/setup-git-deploy.sh` on the server.
 
 ## 7) Notes
 

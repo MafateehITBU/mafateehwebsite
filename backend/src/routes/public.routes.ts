@@ -5,6 +5,7 @@ import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { HttpError } from "../lib/httpError";
 import { getTopReadBlogs, recordBlogRead } from "../lib/blogs";
+import { sendContactNotification } from "../lib/mail";
 import { sanitizeRichHtml } from "../lib/richHtml";
 
 const contactLimiter = rateLimit({
@@ -243,6 +244,22 @@ publicRouter.post(
   asyncHandler(async (req, res) => {
     const body = contactSchema.parse(req.body);
     const created = await prisma.contactSubmission.create({ data: body });
+
+    try {
+      await sendContactNotification({
+        id: created.id,
+        name: created.name,
+        email: created.email,
+        phoneNumber: created.phoneNumber,
+        service: created.service,
+        inquiry: created.inquiry,
+        createdAt: created.createdAt,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Contact notification email failed:", err);
+    }
+
     res.status(201).json(created);
   })
 );

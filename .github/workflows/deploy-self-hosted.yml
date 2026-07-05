@@ -1,11 +1,17 @@
 name: Deploy Production (self-hosted)
 
-# Enable this file AFTER installing the runner on the VPS.
-# Rename or delete deploy-production.yml fail-fast job when enabling.
+# Deploys on the VPS via a self-hosted runner (see deploy/DEPLOYMENT.md).
+# One-time setup: bash deploy/scripts/setup-github-runner.sh <TOKEN>
 
-# Do not enable push until runner is installed — use workflow_dispatch to test.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
