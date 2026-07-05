@@ -13,7 +13,7 @@ export function TestimonialCard({ item, locale }) {
   return (
     <article
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="flex w-[min(100%,22rem)] shrink-0 flex-col rounded-xl border border-primary bg-card px-5 py-5 text-start shadow-sm dark:border-secondary sm:w-[26rem] lg:w-[25rem] sm:px-6 sm:py-6"
+      className="flex w-72 shrink-0 flex-col rounded-xl border border-primary bg-card px-5 py-5 text-start shadow-sm dark:border-secondary sm:w-[26rem] sm:px-6 sm:py-6 lg:w-[25rem]"
     >
       <Icon
         icon="icon-park-outline:quote"

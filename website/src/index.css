@@ -332,15 +332,20 @@ html.dark {
 
   .infinite-marquee-track--running.infinite-marquee-track--rtl {
     animation: infinite-marquee-rtl var(--marquee-duration, 45s) linear infinite;
+    animation-fill-mode: backwards;
   }
 
   .infinite-marquee-track--running.infinite-marquee-track--ltr {
     animation: infinite-marquee-ltr var(--marquee-duration, 45s) linear infinite;
+    animation-fill-mode: backwards;
   }
 
-  .partners-marquee:hover .infinite-marquee-track--running,
-  .testimonials-marquee:hover .infinite-marquee-track--running {
-    animation-play-state: paused;
+  /* Pause on hover only for mouse devices — touch was freezing the track on mobile */
+  @media (hover: hover) {
+    .partners-marquee:hover .infinite-marquee-track--running,
+    .testimonials-marquee:hover .infinite-marquee-track--running {
+      animation-play-state: paused;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -92,7 +92,7 @@ export function InfiniteMarquee({
   return (
     <div
       dir="ltr"
-      className={['w-full overflow-hidden', className].filter(Boolean).join(' ')}
+      className={['w-full overflow-hidden touch-pan-y', className].filter(Boolean).join(' ')}
     >
       <div
         className={[

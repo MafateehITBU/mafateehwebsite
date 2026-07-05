@@ -6,7 +6,7 @@ import { TestimonialCard } from './TestimonialCard.jsx'
  */
 function buildMarqueeSequence(testimonials) {
   if (testimonials.length === 0) return []
-  const minItems = 6
+  const minItems = 10
   let expanded = [...testimonials]
   while (expanded.length < minItems) {
     expanded = [...expanded, ...testimonials]
@@ -28,7 +28,7 @@ export function TestimonialsMarquee({ testimonials, locale }) {
     <InfiniteMarquee
       className="testimonials-marquee mt-10 sm:mt-12"
       groupClassName="flex shrink-0 items-stretch gap-4 sm:gap-5"
-      duration={55}
+      duration={45}
       direction="rtl"
     >
       {sequence.map((item, index) => (
