@@ -1,7 +1,9 @@
 name: Deploy Production (self-hosted)
 
 # Deploys on the VPS via a self-hosted runner (see deploy/DEPLOYMENT.md).
-# One-time setup: bash deploy/scripts/setup-github-runner.sh <TOKEN>
+# One-time setup:
+#   bash deploy/scripts/setup-github-runner.sh <TOKEN>
+#   bash deploy/scripts/fix-runner-deploy-perms.sh
 
 on:
   push:
@@ -23,7 +25,14 @@ jobs:
       - name: Sync to app directory
         run: |
           set -euo pipefail
-          rsync -az --delete \
+          APP_DIR="/opt/mafateehwebsite"
+          if [[ ! -w "$APP_DIR" ]]; then
+            echo "ERROR: $APP_DIR is not writable by $(whoami)."
+            echo "On the server (as root), run:"
+            echo "  bash $APP_DIR/deploy/scripts/fix-runner-deploy-perms.sh"
+            exit 1
+          fi
+          rsync -az --delete --no-owner --no-group \
             --filter='protect deploy/certbot/' \
             --filter='protect deploy/config/backend.env' \
             --filter='protect deploy/config/postgres.env' \
@@ -31,14 +40,17 @@ jobs:
             --exclude ".git" \
             --exclude "node_modules" \
             --exclude "backend/node_modules" \
+            --exclude "backend/dist" \
+            --exclude "backend/src/generated" \
             --exclude "website/node_modules" \
             --exclude "admin-dashboard/node_modules" \
+            --exclude "admin-dashboard/dist" \
             --exclude "backend/.env" \
             --exclude "deploy/certbot/" \
             --exclude "deploy/config/backend.env" \
             --exclude "deploy/config/postgres.env" \
             --exclude "deploy/nginx/conf.d/" \
-            "./" "/opt/mafateehwebsite/"
+            "./" "$APP_DIR/"
 
       - name: Deploy
         run: bash /opt/mafateehwebsite/deploy/scripts/deploy.sh

@@ -52,6 +52,12 @@ bash deploy/scripts/setup-github-runner.sh YOUR_RUNNER_TOKEN
 
 4. In GitHub → Runners, confirm **srv1719442** is **Idle**
 
+5. Fix deploy permissions (required once):
+
+```bash
+bash /opt/mafateehwebsite/deploy/scripts/fix-runner-deploy-perms.sh
+```
+
 After that, every push to `main` runs deploy on the VPS (no SSH from GitHub needed).
 
 ### Optional SSH secrets (legacy cloud deploy — not used)

@@ -63,4 +63,11 @@ runuser -u "$RUNNER_USER" -- bash -c "
 ./svc.sh start
 ./svc.sh status
 
+APP_DIR="/opt/mafateehwebsite"
+if [[ -d "$APP_DIR" ]]; then
+  mkdir -p "$APP_DIR"
+  chown -R "${RUNNER_USER}:${RUNNER_USER}" "$APP_DIR"
+  echo "App directory ownership set: $APP_DIR -> $RUNNER_USER"
+fi
+
 echo "Runner installed. Verify: https://github.com/${REPO}/settings/actions/runners"
