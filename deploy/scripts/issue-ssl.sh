@@ -4,6 +4,7 @@ set -euo pipefail
 
 APP_DIR="/opt/mafateehwebsite"
 EMAIL="${1:-}"
+MAFATEEH_NGINX_CONF="deploy/nginx/conf.d/mafateeh.conf"
 
 if [[ -z "$EMAIL" ]]; then
   echo "Usage: bash deploy/scripts/issue-ssl.sh your@email.com"
@@ -13,8 +14,7 @@ fi
 cd "$APP_DIR"
 mkdir -p deploy/certbot/www deploy/nginx/conf.d
 
-rm -f deploy/nginx/conf.d/*.conf
-cp deploy/nginx/templates/acme-bootstrap.conf deploy/nginx/conf.d/default.conf
+cp deploy/nginx/templates/acme-bootstrap.conf "$MAFATEEH_NGINX_CONF"
 
 docker compose -f deploy/docker-compose.prod.yml up -d reverse-proxy
 
@@ -25,7 +25,7 @@ docker compose -f deploy/docker-compose.prod.yml --profile ssl run --rm certbot 
   -d api.mafateehgroup.com \
   --email "$EMAIL" --agree-tos --no-eff-email --non-interactive
 
-cp deploy/nginx/templates/https.conf deploy/nginx/conf.d/default.conf
+cp deploy/nginx/templates/https.conf "$MAFATEEH_NGINX_CONF"
 docker compose -f deploy/docker-compose.prod.yml up -d
 docker compose -f deploy/docker-compose.prod.yml exec reverse-proxy nginx -s reload
 

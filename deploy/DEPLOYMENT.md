@@ -130,3 +130,5 @@ Alternative (no GitHub runner): git auto-pull every 3 minutes —
 
 - Certbot renewal is configured via cron at `03:00` daily.
 - Backend migrations run automatically on backend container startup (`npm run db:deploy`).
+- Deploy scripts only manage `deploy/nginx/conf.d/mafateeh.conf`, so additional vhost files
+  in `deploy/nginx/conf.d/` (e.g. other domains) are preserved across Mafateeh deploys.

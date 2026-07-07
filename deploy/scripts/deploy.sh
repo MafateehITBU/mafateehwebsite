@@ -4,6 +4,7 @@ set -euo pipefail
 
 APP_DIR="/opt/mafateehwebsite"
 CERT_FILE="deploy/certbot/conf/live/mafateehgroup.com/fullchain.pem"
+MAFATEEH_NGINX_CONF="deploy/nginx/conf.d/mafateeh.conf"
 
 cd "$APP_DIR"
 
@@ -20,8 +21,7 @@ nginx_apply() {
     echo "Missing nginx template: deploy/nginx/templates/${template}"
     exit 1
   fi
-  rm -f deploy/nginx/conf.d/*.conf
-  cp "deploy/nginx/templates/${template}" deploy/nginx/conf.d/default.conf
+  cp "deploy/nginx/templates/${template}" "$MAFATEEH_NGINX_CONF"
 }
 
 wait_for_backend() {
