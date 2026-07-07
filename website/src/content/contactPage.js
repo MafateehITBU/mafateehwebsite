@@ -26,6 +26,11 @@
  *   businessHours: string,
  *   followUs: string,
  *   mapTitle: string,
+ *   bookingHeading: string,
+ *   bookingSubtitle: string,
+ *   bookingButton: string,
+ *   bookingFallback: string,
+ *   bookingUrl: string,
  *   placeholders: {
  *     fullName: string,
  *     phoneNumber: string,
@@ -62,6 +67,13 @@ export const CONTACT_PAGE_CONTENT = {
     businessHours: 'Business Hours',
     followUs: 'Follow Us',
     mapTitle: 'Our location',
+    bookingHeading: 'Book an Appointment',
+    bookingSubtitle:
+      'Choose a date and time directly in our Google Calendar booking page. Time-slot conflicts are handled automatically.',
+    bookingButton: 'Book via Google Calendar',
+    bookingFallback:
+      'Add your Google Calendar appointment-schedule URL in `contactPage.js` (bookingUrl) to enable online booking.',
+    bookingUrl: 'https://calendar.app.google/9HyWJ6BhCqdYMmEb9',
     placeholders: {
       fullName: 'John Doe',
       phoneNumber: '+966 5XX XXX XXXX',
@@ -100,6 +112,13 @@ export const CONTACT_PAGE_CONTENT = {
     businessHours: 'ساعات العمل',
     followUs: 'تابعنا',
     mapTitle: 'موقعنا',
+    bookingHeading: 'احجز موعداً',
+    bookingSubtitle:
+      'اختر التاريخ والوقت مباشرة من صفحة الحجز في تقويم Google. يتم التعامل مع تعارض المواعيد تلقائياً.',
+    bookingButton: 'احجز عبر تقويم Google',
+    bookingFallback:
+      'أضف رابط صفحة مواعيد Google Calendar في `contactPage.js` (bookingUrl) لتفعيل الحجز الإلكتروني.',
+    bookingUrl: 'https://calendar.app.google/9HyWJ6BhCqdYMmEb9',
     placeholders: {
       fullName: 'محمد أحمد',
       phoneNumber: '+966 5XX XXX XXXX',

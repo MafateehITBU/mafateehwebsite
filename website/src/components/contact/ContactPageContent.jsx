@@ -1,5 +1,6 @@
 import { useLanguage } from '../../context/useLanguage.js'
 import { getContactPageContent } from '../../content/contactPage.js'
+import { ContactBookingSection } from './ContactBookingSection.jsx'
 import { ContactForm } from './ContactForm.jsx'
 import { ContactMap } from './ContactMap.jsx'
 import { ContactSupportCard } from './ContactSupportCard.jsx'
@@ -24,6 +25,8 @@ export function ContactPageContent() {
             <ContactMap title={copy.mapTitle} />
           </aside>
         </div>
+
+        <ContactBookingSection locale={locale} copy={copy} />
       </div>
     </section>
   )
