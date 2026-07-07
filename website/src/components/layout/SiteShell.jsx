@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { Icon } from '@iconify/react'
 import { CtaSection } from './CtaSection.jsx'
 import { Footer } from './Footer.jsx'
 import { SiteBackground } from './SiteBackground.jsx'
@@ -46,6 +47,7 @@ function shouldShowCta(pathname) {
 export function SiteShell({ children }) {
   const { pathname } = useLocation()
   const showCta = shouldShowCta(pathname)
+  const whatsappHref = 'https://wa.me/962770609728'
 
   return (
     <div className="relative isolate flex min-h-0 w-full flex-1 flex-col">
@@ -55,6 +57,17 @@ export function SiteShell({ children }) {
         {showCta ? <CtaSection /> : null}
         <Footer />
       </div>
+
+      <a
+        href={whatsappHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Send us a WhatsApp message"
+        title="Send us a WhatsApp message"
+        className="fixed bottom-5 right-5 z-50 inline-flex h-13 w-13 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_28px_rgba(37,211,102,0.35)] transition-transform duration-200 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:bottom-6 sm:right-6"
+      >
+        <Icon icon="mdi:whatsapp" className="h-7 w-7" aria-hidden />
+      </a>
     </div>
   )
 }
