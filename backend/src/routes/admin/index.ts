@@ -254,7 +254,18 @@ adminRouter.put(
   asyncHandler(async (req, res) => {
     const data = z
       .object({
-        googleTagId: z.string().max(200).optional().nullable(),
+        googleTagId: z
+          .string()
+          .max(2000)
+          .optional()
+          .nullable()
+          .transform((v) => {
+            if (v == null || !String(v).trim()) return null;
+            const raw = String(v).trim();
+            if (/^(AW|G|GT|UA)-[\w-]+$/i.test(raw)) return raw;
+            const match = raw.match(/\b((?:AW|G|GT|UA)-[\w-]+)\b/i);
+            return match ? match[1] : raw.slice(0, 200);
+          }),
         metaTitle: z.string().max(200).optional().nullable(),
         metaDescription: z
           .string()
