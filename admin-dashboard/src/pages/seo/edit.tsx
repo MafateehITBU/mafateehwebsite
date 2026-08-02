@@ -3,6 +3,14 @@ import { Form, Input, Typography } from "antd";
 import { ImageUploadField } from "../../components/ImageUploadField";
 import { MultilineTextArea } from "../../components/MultilineTextArea";
 
+type SeoFormValues = {
+  googleTagId?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  ogImageUrl?: string | null;
+};
+
 /** Extracts AW-/G-/GT-/UA- IDs from a pasted gtag snippet, or returns trimmed ID. */
 function normalizeGoogleTagId(value: unknown): string | undefined {
   if (value == null) return undefined;
@@ -21,8 +29,8 @@ export const SeoEdit = () => {
       <Form
         {...formProps}
         layout="vertical"
-        onFinish={(values) => {
-          const next = {
+        onFinish={(values: SeoFormValues) => {
+          const next: SeoFormValues = {
             ...values,
             googleTagId: normalizeGoogleTagId(values.googleTagId) ?? null,
           };
