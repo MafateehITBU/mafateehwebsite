@@ -1,8 +1,10 @@
 import { useLocation } from 'react-router-dom'
 import { Icon } from '@iconify/react'
+import { CookieConsent } from '../common/CookieConsent.jsx'
 import { CtaSection } from './CtaSection.jsx'
 import { Footer } from './Footer.jsx'
 import { SiteBackground } from './SiteBackground.jsx'
+import { stripLocalePrefix } from '../../utils/localePath.js'
 
 /**
  * App shell: background decor, page content, optional CTA, footer.
@@ -15,6 +17,8 @@ const STATIC_ROUTES = new Set([
   '/',
   '/blogs',
   '/privacy-policy',
+  '/terms-and-conditions',
+  '/cookie-policy',
   '/about',
   '/it-solutions',
   '/digital-marketing',
@@ -24,20 +28,29 @@ const STATIC_ROUTES = new Set([
 ])
 
 /** @param {string} pathname */
+function logicalPathname(pathname) {
+  return stripLocalePrefix(pathname.replace(/\/$/, '') || '/') || '/'
+}
+
+/** @param {string} pathname */
 function isKnownRoute(pathname) {
-  if (STATIC_ROUTES.has(pathname)) return true
-  if (/^\/blogs\/[^/]+$/.test(pathname)) return true
+  const logical = logicalPathname(pathname)
+  if (STATIC_ROUTES.has(logical)) return true
+  if (/^\/blogs\/[^/]+$/.test(logical)) return true
   return false
 }
 
 /** Return false on paths that should NOT show the shared CTA above the footer. */
 function shouldShowCta(pathname) {
+  const logical = logicalPathname(pathname)
   if (!isKnownRoute(pathname)) return false
-  if (pathname === '/') return false
-  if (pathname === '/contact') return false
-  if (pathname === '/privacy-policy') return false
-  if (pathname === '/blogs') return false
-  if (pathname.startsWith('/blogs/')) return false
+  if (logical === '/') return false
+  if (logical === '/contact') return false
+  if (logical === '/privacy-policy') return false
+  if (logical === '/terms-and-conditions') return false
+  if (logical === '/cookie-policy') return false
+  if (logical === '/blogs') return false
+  if (logical.startsWith('/blogs/')) return false
   return true
 }
 
@@ -57,6 +70,8 @@ export function SiteShell({ children }) {
         {showCta ? <CtaSection /> : null}
         <Footer />
       </div>
+
+      <CookieConsent />
 
       <a
         href={whatsappHref}

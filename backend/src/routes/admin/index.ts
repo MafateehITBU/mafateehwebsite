@@ -12,6 +12,7 @@ import { normalizeMultiline } from "../../lib/multiline";
 import { sanitizeBlogHtml, sanitizeRichHtml, stripHtmlToPlainText } from "../../lib/blogHtml";
 import { PERMISSIONS, hasPermission, parsePermissions } from "../../lib/permissions";
 import { uploadBuffer, initCloudinary } from "../../lib/cloudinary";
+import { optimizeImageBuffer } from "../../lib/imageOptimize";
 import { cloudinaryConfigured } from "../../config/env";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth";
@@ -115,7 +116,8 @@ adminRouter.post(
         ? req.query.folder.replace(/[^a-z0-9-_]/gi, "")
         : "misc";
     initCloudinary();
-    const uploaded = await uploadBuffer(req.file.buffer, folder);
+    const optimized = await optimizeImageBuffer(req.file.buffer, req.file.mimetype);
+    const uploaded = await uploadBuffer(optimized.buffer, folder, undefined, optimized.mimetype);
     res.status(201).json(uploaded);
   })
 );
@@ -134,6 +136,22 @@ async function getOrCreateStatic() {
     row = await prisma.staticSiteInfo.create({ data: {} });
   }
   return row;
+}
+
+async function getOrCreateTerms() {
+  let row = await prisma.termsAndConditions.findFirst();
+  if (!row) {
+    row = await prisma.termsAndConditions.create({ data: { content: "", contentAr: "" } });
+  }
+  return row;
+}
+
+function toTermsResponse(row: Awaited<ReturnType<typeof getOrCreateTerms>>) {
+  return {
+    ...row,
+    content: sanitizeRichHtml(row.content, { extended: true }),
+    contentAr: sanitizeRichHtml(row.contentAr, { extended: true }),
+  };
 }
 
 async function getOrCreatePrivacy() {
@@ -237,6 +255,39 @@ adminRouter.put(
       data,
     });
     res.json(toPrivacyPolicyResponse(row));
+  })
+);
+
+adminRouter.get(
+  "/terms-and-conditions",
+  requirePermission("privacy"),
+  asyncHandler(async (_req, res) => {
+    res.json(toTermsResponse(await getOrCreateTerms()));
+  })
+);
+
+adminRouter.put(
+  "/terms-and-conditions",
+  requirePermission("privacy"),
+  asyncHandler(async (req, res) => {
+    const termsContent = z
+      .string()
+      .min(1)
+      .transform((s) => sanitizeRichHtml(s, { extended: true }))
+      .refine((s) => stripHtmlToPlainText(s).length > 0, "Content is required");
+
+    const data = z
+      .object({
+        content: termsContent,
+        contentAr: termsContent,
+      })
+      .parse(req.body);
+    const existing = await getOrCreateTerms();
+    const row = await prisma.termsAndConditions.update({
+      where: { id: existing.id },
+      data,
+    });
+    res.json(toTermsResponse(row));
   })
 );
 

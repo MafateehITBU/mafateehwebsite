@@ -50,6 +50,22 @@ publicRouter.get(
 );
 
 publicRouter.get(
+  "/terms-and-conditions",
+  asyncHandler(async (_req, res) => {
+    const row = await prisma.termsAndConditions.findFirst();
+    if (!row) {
+      res.json(null);
+      return;
+    }
+    res.json({
+      ...row,
+      content: sanitizeRichHtml(row.content, { extended: true }),
+      contentAr: sanitizeRichHtml(row.contentAr, { extended: true }),
+    });
+  })
+);
+
+publicRouter.get(
   "/seo",
   asyncHandler(async (_req, res) => {
     const row = await prisma.sEOSettings.findFirst();

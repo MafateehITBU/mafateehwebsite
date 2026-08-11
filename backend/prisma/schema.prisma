@@ -62,6 +62,13 @@ model PrivacyPolicy {
   updatedAt DateTime @updatedAt
 }
 
+model TermsAndConditions {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  contentAr String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
 model BlogCategory {
   id     String @id @default(cuid())
   name   String

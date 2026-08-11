@@ -28,6 +28,7 @@ import { LoginPage } from "./pages/login";
 import { ContactList, ContactShow, ContactEdit } from "./pages/contacts";
 import { StaticSiteInfoList, StaticSiteInfoEdit } from "./pages/static-site-info";
 import { PrivacyPolicyList, PrivacyPolicyEdit } from "./pages/privacy-policy";
+import { TermsAndConditionsList, TermsAndConditionsEdit } from "./pages/terms-and-conditions";
 import { SeoList, SeoEdit } from "./pages/seo";
 import {
   BlogCategoryCreate,
@@ -231,6 +232,12 @@ const resources = [
     edit: "/privacy-policy/edit/:id",
     meta: { label: "Privacy Policy", canDelete: false },
   },
+  {
+    name: "terms_and_conditions",
+    list: "/terms-and-conditions",
+    edit: "/terms-and-conditions/edit/:id",
+    meta: { label: "Terms & Conditions", canDelete: false },
+  },
 ];
 
 function RefineLayout() {
@@ -331,6 +338,24 @@ const router = createBrowserRouter(
                           element={
                             <ProtectedRoute resource="privacy_policy" action="edit">
                               <PrivacyPolicyEdit />
+                            </ProtectedRoute>
+                          }
+                        />
+                      </Route>
+                      <Route path="/terms-and-conditions">
+                        <Route
+                          index
+                          element={
+                            <ProtectedRoute resource="terms_and_conditions" action="list">
+                              <TermsAndConditionsList />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="edit/:id"
+                          element={
+                            <ProtectedRoute resource="terms_and_conditions" action="edit">
+                              <TermsAndConditionsEdit />
                             </ProtectedRoute>
                           }
                         />

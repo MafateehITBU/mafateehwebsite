@@ -7,6 +7,7 @@ import {
 } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useLocalizedPath } from '../../../hooks/useLocalizedPath.js'
 
 const DOT_COUNT = 14
 /** Golden focal ring radius in SVG units (viewBox 1000×1000). */
@@ -254,6 +255,7 @@ export function ConnectedCapabilitiesOrbit({
   ariaLabel = 'Capabilities',
   textRtl = false,
 }) {
+  const localizedPath = useLocalizedPath()
   const reduceMotion = useReducedMotion()
   const viewportRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const [orbitRadius, setOrbitRadius] = useState(280)
@@ -418,7 +420,7 @@ export function ConnectedCapabilitiesOrbit({
                 >
                   {inFrame ? (
                     <Link
-                      to={item.href}
+                      to={localizedPath(item.href)}
                       className="capabilities-orbit__orbit-label capabilities-orbit__orbit-label--in-frame"
                       dir={labelDir}
                       lang={textRtl ? 'ar' : undefined}

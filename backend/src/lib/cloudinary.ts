@@ -17,17 +17,22 @@ export function initCloudinary(): void {
 export async function uploadBuffer(
   buffer: Buffer,
   folder: string,
-  filename?: string
+  filename?: string,
+  mimetype = "image/jpeg"
 ): Promise<{ url: string; publicId: string }> {
   if (!cloudinaryConfigured()) {
     throw new HttpError(503, "Cloudinary is not configured");
   }
+  const format =
+    mimetype === "image/webp" ? "webp" : mimetype === "image/png" ? "png" : "jpg";
   return new Promise((resolve, reject) => {
     const upload = cloudinary.uploader.upload_stream(
       {
         folder: `mafateeh/${folder}`,
         public_id: filename,
         resource_type: "image",
+        format,
+        quality: "auto",
       },
       (err, result) => {
         if (err || !result) {

@@ -1,0 +1,21 @@
+{
+  "name": "Mafateeh Group",
+  "short_name": "Mafateeh",
+  "description": "IT & digital solutions by Mafateeh Group",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#00502E",
+  "theme_color": "#00502E",
+  "icons": [
+    {
+      "src": "/logo-mafateeh.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-mafateeh.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

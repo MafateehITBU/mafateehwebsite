@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'
 import { formatBlogDate, pickLocalized } from '../home/Blogs/blogLocale.js'
 
 /**
@@ -9,6 +10,7 @@ import { formatBlogDate, pickLocalized } from '../home/Blogs/blogLocale.js'
  * }} props
  */
 export function MostReadBlogRow({ item, locale, readCountLabel }) {
+  const localizedPath = useLocalizedPath()
   const slug = String(item.slug ?? '')
   const title = pickLocalized(locale, item.title, item.titleAr)
   const imageUrl = item.img
@@ -18,7 +20,7 @@ export function MostReadBlogRow({ item, locale, readCountLabel }) {
   return (
     <li>
       <Link
-        to={`/blogs/${slug}`}
+        to={localizedPath(`/blogs/${slug}`)}
         className="group flex gap-3 py-4 transition-colors sm:gap-4"
       >
         {imageUrl ? (

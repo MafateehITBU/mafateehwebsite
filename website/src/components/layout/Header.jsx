@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Link, useLocation } from 'react-router-dom'
 import logo from '../../assets/imgs/logo.png'
 import logoWhite from '../../assets/imgs/logo-white.png'
 import { NAV_ITEMS } from '../../constants/navigation.js'
 import { useLanguage } from '../../context/useLanguage.js'
-import { isNavActive, usePathname } from '../../utils/pathname.js'
+import { useLocaleToggle } from '../../hooks/useLocaleToggle.js'
+import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'
+import { isNavActive } from '../../utils/pathname.js'
 import { LanguageFlag } from '../LanguageFlag.jsx'
 import { ThemeToggle } from '../ThemeToggle.jsx'
 
@@ -77,9 +80,9 @@ function mobileMenuNavLinkClass(active) {
 /** Language flag, Contact us, and theme toggle (desktop header). */
 function HeaderActions({
   contactLabel,
+  contactHref,
   locale,
   onToggleLocale,
-  onContactClick,
 }) {
   return (
     <>
@@ -96,21 +99,22 @@ function HeaderActions({
       >
         <LanguageFlag locale={locale} />
       </button>
-      <a
-        href="contact"
+      <Link
+        to={contactHref}
         className="inline-flex min-w-[9.5rem] shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-secondary px-6 py-2.5 font-body text-sm font-semibold text-white shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-w-[10.5rem] sm:px-8 sm:text-base"
-        onClick={onContactClick}
       >
         {contactLabel}
-      </a>
+      </Link>
       <ThemeToggle />
     </>
   )
 }
 
 export function Header() {
-  const { locale, toggleLocale } = useLanguage()
-  const pathname = usePathname()
+  const { locale } = useLanguage()
+  const toggleLocale = useLocaleToggle()
+  const localizedPath = useLocalizedPath()
+  const { pathname } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuId = useId()
   const menuPanelRef = useRef(/** @type {HTMLElement | null} */ (null))
@@ -199,15 +203,15 @@ export function Header() {
                   return (
                     <li key={item.key}>
                       <div className="py-4">
-                        <a
-                          href={item.href}
+                        <Link
+                          to={localizedPath(item.href)}
                           className={mobileMenuNavLinkClass(active)}
                           aria-current={active ? 'page' : undefined}
                           tabIndex={menuOpen ? 0 : -1}
                           onClick={closeMenu}
                         >
                           {label}
-                        </a>
+                        </Link>
                       </div>
                       <div
                         className="mobile-menu-divider w-full"
@@ -227,6 +231,7 @@ export function Header() {
                   className="mt-4 inline-flex w-fit items-center justify-center transition hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
                   onClick={() => {
                     toggleLocale()
+                    closeMenu()
                   }}
                   tabIndex={menuOpen ? 0 : -1}
                   aria-label={
@@ -240,14 +245,14 @@ export function Header() {
                     className="h-8 w-auto shrink-0 rounded-sm object-cover"
                   />
                 </button>
-                <a
-                  href="/contact"
+                <Link
+                  to={localizedPath('/contact')}
                   className="mt-8 flex w-full items-center justify-center rounded-lg bg-secondary px-6 py-3.5 font-body text-base font-semibold text-white shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
                   tabIndex={menuOpen ? 0 : -1}
                   onClick={closeMenu}
                 >
                   {contactLabel}
-                </a>
+                </Link>
               </div>
             </nav>
           </aside>,
@@ -266,8 +271,8 @@ export function Header() {
             dir={isRtl ? 'rtl' : 'ltr'}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3 md:gap-4 lg:gap-5">
-              <a
-                href="/"
+              <Link
+                to={localizedPath('/')}
                 className="block shrink-0 outline-none ring-primary focus-visible:ring-2"
                 aria-label="Mafateeh"
                 onClick={closeMenu}
@@ -288,7 +293,7 @@ export function Header() {
                   height={48}
                   decoding="async"
                 />
-              </a>
+              </Link>
 
               <nav
                 className="hidden min-w-0 md:block"
@@ -300,13 +305,13 @@ export function Header() {
                     const active = isNavActive(item.href, pathname)
                     return (
                       <li key={item.key}>
-                        <a
-                          href={item.href}
+                        <Link
+                          to={localizedPath(item.href)}
                           className={navLinkClass(active)}
                           aria-current={active ? 'page' : undefined}
                         >
                           {label}
-                        </a>
+                        </Link>
                       </li>
                     )
                   })}
@@ -317,6 +322,7 @@ export function Header() {
             <div className="hidden shrink-0 items-center md:flex md:gap-5 lg:gap-6">
               <HeaderActions
                 contactLabel={contactLabel}
+                contactHref={localizedPath('/contact')}
                 locale={locale}
                 onToggleLocale={toggleLocale}
               />

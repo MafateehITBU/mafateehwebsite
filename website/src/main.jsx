@@ -5,7 +5,6 @@ import App from './App.jsx'
 import { LanguageProvider } from './context/LanguageProvider.jsx'
 import { ThemeProvider } from './context/ThemeProvider.jsx'
 import { StaticInfoProvider } from './context/StaticInfoContext.jsx'
-import { SeoProvider } from './context/SeoProvider.jsx'
 import { ToastProvider } from './components/ui/ToastProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -13,10 +12,8 @@ createRoot(document.getElementById('root')).render(
     <LanguageProvider>
       <ThemeProvider>
         <StaticInfoProvider>
-          <SeoProvider>
-            <ToastProvider />
-            <App />
-          </SeoProvider>
+          <ToastProvider />
+          <App />
         </StaticInfoProvider>
       </ThemeProvider>
     </LanguageProvider>

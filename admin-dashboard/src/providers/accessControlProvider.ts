@@ -5,6 +5,7 @@ const RESOURCE_PERMISSION_MAP: Record<string, string | null> = {
   dashboard: null,
   static_site_info: "static_info",
   privacy_policy: "privacy",
+  terms_and_conditions: "privacy",
   seo: "seo",
   tags: "blogs",
   blog_categories: "blogs",

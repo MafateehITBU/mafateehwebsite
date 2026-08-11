@@ -24,6 +24,7 @@ export const RESOURCE_PATH: Record<string, string> = {
   dashboard: "",
   static_site_info: "/static-site-info",
   privacy_policy: "/privacy-policy",
+  terms_and_conditions: "/terms-and-conditions",
   seo: "/seo",
   tags: "/tags",
   blog_categories: "/blog-categories",
@@ -43,6 +44,7 @@ export const RESOURCE_PATH: Record<string, string> = {
 const SINGLETON_RESOURCES = new Set([
   "static_site_info",
   "privacy_policy",
+  "terms_and_conditions",
   "seo",
 ]);
 

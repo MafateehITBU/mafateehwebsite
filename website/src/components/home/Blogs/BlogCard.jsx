@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react'
 import { Link } from 'react-router-dom'
+import { useLocalizedPath } from '../../../hooks/useLocalizedPath.js'
 import { formatBlogDate, getBlogLabels } from './blogLocale.js'
 
 /**
@@ -11,6 +12,7 @@ import { formatBlogDate, getBlogLabels } from './blogLocale.js'
  * }} props
  */
 export function BlogCard({ blog, locale, readMoreLabel, minReadLabel }) {
+  const localizedPath = useLocalizedPath()
   const { title, excerpt, categoryName, readTime } = getBlogLabels(locale, blog)
   const slug = String(blog.slug ?? '')
   const imageUrl = blog.featuredImageUrl
@@ -63,7 +65,7 @@ export function BlogCard({ blog, locale, readMoreLabel, minReadLabel }) {
 
         <div className="mt-3 flex items-center justify-between gap-3">
           <Link
-            to={`/blogs/${slug}`}
+            to={localizedPath(`/blogs/${slug}`)}
             className="inline-flex items-center gap-1.5 font-body text-sm font-medium text-primary transition-[gap] duration-300 ease-out group-hover:gap-3 dark:text-white"
           >
             {readMoreLabel}

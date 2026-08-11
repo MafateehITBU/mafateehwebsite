@@ -18,13 +18,15 @@ export function usePathname() {
   return useSyncExternalStore(subscribeToPathname, getPathname, () => '/')
 }
 
+import { stripLocalePrefix } from './localePath.js'
+
 /**
- * @param {string} href
- * @param {string} pathname
+ * @param {string} href Logical href e.g. `/about`
+ * @param {string} pathname Full pathname e.g. `/en/about`
  */
 export function isNavActive(href, pathname) {
-  const p = pathname.replace(/\/$/, '') || '/'
-  const h = href.replace(/\/$/, '') || '/'
+  const p = stripLocalePrefix(pathname.replace(/\/$/, '') || '/')
+  const h = (href.replace(/\/$/, '') || '/')
   if (h === '/') return p === '/' || p === ''
   return p === h || p.startsWith(`${h}/`)
 }

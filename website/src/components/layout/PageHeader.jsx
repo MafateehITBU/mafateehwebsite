@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { getPageHeaderContent } from '../../content/pageHeader.js'
 import { useLanguage } from '../../context/useLanguage.js'
+import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'
 
 /**
  * Inner page hero — NOT `section-solid` (site decor shows through).
@@ -21,9 +22,11 @@ import { useLanguage } from '../../context/useLanguage.js'
  *   homeHref?: string,
  * }} props
  */
-export function PageHeader({ pageName, title, subtitle, homeHref = '/' }) {
+export function PageHeader({ pageName, title, subtitle, homeHref }) {
   const { locale } = useLanguage()
+  const localizedPath = useLocalizedPath()
   const { home } = getPageHeaderContent(locale)
+  const resolvedHomeHref = homeHref ?? localizedPath('/')
   const isRtl = locale === 'ar'
 
   return (
@@ -36,7 +39,7 @@ export function PageHeader({ pageName, title, subtitle, homeHref = '/' }) {
           <ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-body text-sm text-white/85 sm:text-base">
             <li>
               <Link
-                to={homeHref}
+                to={resolvedHomeHref}
                 className="transition-colors hover:text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
               >
                 {home}

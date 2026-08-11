@@ -23,6 +23,8 @@ export const FOOTER_CONTENT = {
       { key: 'packages', href: '/packages', label: 'Packages' },
       { key: 'blog', href: '/blogs', label: 'Blog' },
       { key: 'privacy', href: '/privacy-policy', label: 'Privacy Policy' },
+      { key: 'terms', href: '/terms-and-conditions', label: 'Terms & Conditions' },
+      { key: 'cookies', href: '/cookie-policy', label: 'Cookie Policy' },
     ],
     services: [
       'IT Solutions',
@@ -57,6 +59,8 @@ export const FOOTER_CONTENT = {
       { key: 'packages', href: '/packages', label: 'الباقات' },
       { key: 'blog', href: '/blogs', label: 'المدونة' },
       { key: 'privacy', href: '/privacy-policy', label: 'سياسة الخصوصية' },
+      { key: 'terms', href: '/terms-and-conditions', label: 'الشروط والأحكام' },
+      { key: 'cookies', href: '/cookie-policy', label: 'سياسة ملفات تعريف الارتباط' },
     ],
     services: [
       'حلول تقنية المعلومات',

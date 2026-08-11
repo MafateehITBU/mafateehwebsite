@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import logoWhite from '../../assets/imgs/logo-white.png'
 import { getFooterContent } from '../../content/footer.js'
 import { useLanguage } from '../../context/useLanguage.js'
+import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'
 import { useStaticInfo } from '../../context/StaticInfoContext.jsx'
 
 const CONTACT_ICONS = {
@@ -42,6 +43,7 @@ function ContactRow({ icon, label, children }) {
 
 export function Footer() {
   const { locale } = useLanguage()
+  const localizedPath = useLocalizedPath()
   const copy = getFooterContent(locale)
   const { staticInfo, loading, getLocalizedAddress } = useStaticInfo()
   const address = getLocalizedAddress(locale)
@@ -77,7 +79,7 @@ export function Footer() {
               {copy.nav.map((item) => (
                 <li key={item.key}>
                   <Link
-                    to={item.href}
+                    to={localizedPath(item.href)}
                     className="font-body text-sm text-white transition-colors hover:text-secondary"
                   >
                     {item.label}

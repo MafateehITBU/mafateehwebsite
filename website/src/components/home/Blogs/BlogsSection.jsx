@@ -4,11 +4,13 @@ import api from '../../../axiosConfig.js'
 import { useLanguage } from '../../../context/useLanguage.js'
 import { getHomeContent } from '../../../content/index.js'
 import { getApiErrorMessage } from '../../../utils/apiError.js'
+import { useLocalizedPath } from '../../../hooks/useLocalizedPath.js'
 import { BlogCard } from './BlogCard.jsx'
 import { isPublishedBlog } from './blogLocale.js'
 
 export function BlogsSection() {
   const { locale } = useLanguage()
+  const localizedPath = useLocalizedPath()
   const { blogs: copy } = getHomeContent(locale)
   const [blogs, setBlogs] = useState(/** @type {Array<Record<string, unknown>>} */ ([]))
   const [loading, setLoading] = useState(true)
@@ -51,7 +53,7 @@ export function BlogsSection() {
             {copy.heading}
           </h2>
           <Link
-            to="/blogs"
+            to={localizedPath('/blogs')}
             className="inline-flex min-h-11 shrink-0 items-center justify-center self-start rounded-lg bg-primary px-6 py-2.5 font-body text-sm font-semibold text-white transition-colors duration-200 hover:bg-secondary sm:self-center"
           >
             {copy.viewAll}
