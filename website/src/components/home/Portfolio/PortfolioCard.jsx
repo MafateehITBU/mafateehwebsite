@@ -1,4 +1,5 @@
 import { MultilineText } from '../../common/MultilineText.jsx'
+import { optimizedImageUrl } from '../../../utils/optimizedImageUrl.js'
 import { getPortfolioLabels } from './portfolioLocale.js'
 
 /**
@@ -13,7 +14,13 @@ export function PortfolioCard({ item, locale }) {
     <>
       {imageUrl ? (
         <img
-          src={imageUrl}
+          src={optimizedImageUrl(imageUrl, { width: 800 })}
+          srcSet={[
+            `${optimizedImageUrl(imageUrl, { width: 400 })} 400w`,
+            `${optimizedImageUrl(imageUrl, { width: 800 })} 800w`,
+            `${optimizedImageUrl(imageUrl, { width: 1200 })} 1200w`,
+          ].join(', ')}
+          sizes="(max-width: 640px) 100vw, 400px"
           alt={title}
           className="aspect-[16/10] w-full object-cover"
           loading="lazy"

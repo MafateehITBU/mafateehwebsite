@@ -77,6 +77,12 @@ export function ContactForm({ copy, locale }) {
         service,
         inquiry: inquiry.trim(),
       })
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'generate_lead', {
+          event_category: 'contact',
+          event_label: service || 'general',
+        })
+      }
       notify.success(copy.success)
       setName('')
       setPhoneNumber('')

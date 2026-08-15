@@ -125,6 +125,7 @@ const KNOWN_PATHS = new Set([
   '/privacy-policy',
   '/terms-and-conditions',
   '/cookie-policy',
+  '/accessibility',
 ])
 
 /** @param {string} pathname */
@@ -148,6 +149,7 @@ function pageLabelFromPath(pathname) {
     '/privacy-policy': 'Privacy Policy',
     '/terms-and-conditions': 'Terms & Conditions',
     '/cookie-policy': 'Cookie Policy',
+    '/accessibility': 'Accessibility',
   }
   if (map[pathname]) return map[pathname]
   if (pathname.startsWith('/blogs/')) return 'Blog Post'
@@ -245,6 +247,7 @@ export function SeoProvider({ children }) {
       upsertJsonLd('organization', null)
       upsertJsonLd('website', null)
       upsertJsonLd('breadcrumb', null)
+      upsertJsonLd('blogposting', null)
     } else {
       const organization = {
         '@context': 'https://schema.org',
@@ -290,7 +293,7 @@ export function SeoProvider({ children }) {
           '@type': 'ListItem',
           position: 1,
           name: 'Home',
-          item: `${SITE_ORIGIN}/`,
+          item: `${SITE_ORIGIN}${localizedPath('/', locale)}`,
         },
       ]
       if (logicalPath !== '/') {
@@ -306,6 +309,24 @@ export function SeoProvider({ children }) {
         '@type': 'BreadcrumbList',
         itemListElement: crumbs,
       })
+
+      if (logicalPath.startsWith('/blogs/') && logicalPath.length > '/blogs/'.length) {
+        const slug = logicalPath.slice('/blogs/'.length)
+        upsertJsonLd('blogposting', {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: metaTitle,
+          description: metaDescription,
+          url: canonicalUrl,
+          image: ogImageUrl,
+          inLanguage: locale === 'ar' ? 'ar' : 'en',
+          publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+          mainEntityOfPage: canonicalUrl,
+          identifier: slug,
+        })
+      } else {
+        upsertJsonLd('blogposting', null)
+      }
     }
 
     document

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import api from '../axiosConfig.js'
 import { BlogPostArticle } from '../components/blog/BlogPostArticle.jsx'
 import { BlogPostSidebar } from '../components/blog/BlogPostSidebar.jsx'
@@ -7,11 +7,14 @@ import { Header } from '../components/layout/Header.jsx'
 import { getBlogPostContent } from '../content/blogPost.js'
 import { getHomeContent } from '../content/index.js'
 import { useLanguage } from '../context/useLanguage.js'
+import { useLocalizedPath } from '../hooks/useLocalizedPath.js'
 import { formatBlogDate, getBlogLabels } from '../components/home/Blogs/blogLocale.js'
 
 export function BlogPost() {
   const { slug } = useParams()
   const { locale } = useLanguage()
+  const localizedPath = useLocalizedPath()
+  const navigate = useNavigate()
   const copy = getBlogPostContent(locale)
   const { blogs: cardCopy } = getHomeContent(locale)
   const isRtl = locale === 'ar'
@@ -38,7 +41,10 @@ export function BlogPost() {
         }
       })
       .catch(() => {
-        if (!cancelled) setError('not-found')
+        if (!cancelled) {
+          setError('not-found')
+          navigate(localizedPath('/blogs'), { replace: true, state: { missingSlug: slug } })
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -46,7 +52,7 @@ export function BlogPost() {
     return () => {
       cancelled = true
     }
-  }, [slug])
+  }, [slug, localizedPath, navigate])
 
   const labels = blog ? getBlogLabels(locale, blog) : null
   const createdAt = blog ? formatBlogDate(String(blog.createdAt ?? ''), locale) : ''
@@ -67,7 +73,7 @@ export function BlogPost() {
             <div>
               <p className="font-body text-foreground/70">{copy.notFound}</p>
               <Link
-                to="/blogs"
+                to={localizedPath('/blogs')}
                 className="mt-4 inline-block font-body text-primary hover:underline dark:text-secondary"
               >
                 {copy.backToBlog}

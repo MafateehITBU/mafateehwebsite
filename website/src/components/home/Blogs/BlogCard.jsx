@@ -1,6 +1,7 @@
 import { Icon } from '@iconify/react'
 import { Link } from 'react-router-dom'
 import { useLocalizedPath } from '../../../hooks/useLocalizedPath.js'
+import { optimizedImageUrl } from '../../../utils/optimizedImageUrl.js'
 import { formatBlogDate, getBlogLabels } from './blogLocale.js'
 
 /**
@@ -24,7 +25,12 @@ export function BlogCard({ blog, locale, readMoreLabel, minReadLabel }) {
       <div className="relative overflow-hidden">
         {imageUrl ? (
           <img
-            src={String(imageUrl)}
+            src={optimizedImageUrl(imageUrl, { width: 800 })}
+            srcSet={[
+              `${optimizedImageUrl(imageUrl, { width: 400 })} 400w`,
+              `${optimizedImageUrl(imageUrl, { width: 800 })} 800w`,
+            ].join(', ')}
+            sizes="(max-width: 640px) 100vw, 360px"
             alt=""
             className="aspect-[16/8] w-full object-cover transition-transform duration-300 ease-out group-hover:-translate-y-2"
             loading="lazy"

@@ -19,6 +19,7 @@ const STATIC_ROUTES = new Set([
   '/privacy-policy',
   '/terms-and-conditions',
   '/cookie-policy',
+  '/accessibility',
   '/about',
   '/it-solutions',
   '/digital-marketing',
@@ -49,6 +50,7 @@ function shouldShowCta(pathname) {
   if (logical === '/privacy-policy') return false
   if (logical === '/terms-and-conditions') return false
   if (logical === '/cookie-policy') return false
+  if (logical === '/accessibility') return false
   if (logical === '/blogs') return false
   if (logical.startsWith('/blogs/')) return false
   return true
@@ -80,6 +82,14 @@ export function SiteShell({ children }) {
         aria-label="Send us a WhatsApp message"
         title="Send us a WhatsApp message"
         className="fixed bottom-5 right-5 z-50 inline-flex h-13 w-13 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_28px_rgba(37,211,102,0.35)] transition-transform duration-200 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:bottom-6 sm:right-6"
+        onClick={() => {
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', 'contact', {
+              event_category: 'whatsapp',
+              event_label: 'float_button',
+            })
+          }
+        }}
       >
         <Icon icon="mdi:whatsapp" className="h-7 w-7" aria-hidden />
       </a>

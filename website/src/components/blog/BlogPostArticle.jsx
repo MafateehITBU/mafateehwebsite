@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react'
 import { RichHtmlContent } from '../common/RichHtmlContent.jsx'
+import { optimizedImageUrl } from '../../utils/optimizedImageUrl.js'
 
 /**
  * @param {{
@@ -56,7 +57,13 @@ export function BlogPostArticle({
 
       {featuredImageUrl ? (
         <img
-          src={String(featuredImageUrl)}
+          src={optimizedImageUrl(featuredImageUrl, { width: 1200 })}
+          srcSet={[
+            `${optimizedImageUrl(featuredImageUrl, { width: 640 })} 640w`,
+            `${optimizedImageUrl(featuredImageUrl, { width: 960 })} 960w`,
+            `${optimizedImageUrl(featuredImageUrl, { width: 1200 })} 1200w`,
+          ].join(', ')}
+          sizes="(max-width: 768px) 100vw, 768px"
           alt=""
           className="mx-auto mt-6 block max-h-[28rem] w-full max-w-3xl rounded-xl object-cover"
           loading="lazy"

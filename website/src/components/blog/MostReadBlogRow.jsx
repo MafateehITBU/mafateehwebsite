@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'
+import { optimizedImageUrl } from '../../utils/optimizedImageUrl.js'
 import { formatBlogDate, pickLocalized } from '../home/Blogs/blogLocale.js'
 
 /**
@@ -25,7 +26,7 @@ export function MostReadBlogRow({ item, locale, readCountLabel }) {
       >
         {imageUrl ? (
           <img
-            src={String(imageUrl)}
+            src={optimizedImageUrl(imageUrl, { width: 240 })}
             alt=""
             className="h-16 w-20 shrink-0 rounded-lg object-cover sm:h-[4.5rem] sm:w-[5.5rem]"
             loading="lazy"

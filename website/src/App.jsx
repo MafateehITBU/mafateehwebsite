@@ -32,6 +32,11 @@ const TermsAndConditions = lazy(() =>
 const CookiePolicy = lazy(() =>
   import('./pages/CookiePolicy.jsx').then((m) => ({ default: m.CookiePolicy })),
 )
+const AccessibilityStatement = lazy(() =>
+  import('./pages/AccessibilityStatement.jsx').then((m) => ({
+    default: m.AccessibilityStatement,
+  })),
+)
 const About = lazy(() =>
   import('./pages/About.jsx').then((m) => ({ default: m.About })),
 )
@@ -103,6 +108,7 @@ function App() {
               <Route path="/privacy-policy" element={<LegacyLocaleRedirect to="/privacy-policy" />} />
               <Route path="/terms-and-conditions" element={<LegacyLocaleRedirect to="/terms-and-conditions" />} />
               <Route path="/cookie-policy" element={<LegacyLocaleRedirect to="/cookie-policy" />} />
+              <Route path="/accessibility" element={<LegacyLocaleRedirect to="/accessibility" />} />
               <Route path="/:locale" element={<LocaleLayout />}>
                 <Route index element={<Home />} />
                 <Route path="blog" element={<Navigate to="../blogs" replace />} />
@@ -111,6 +117,7 @@ function App() {
                 <Route path="privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="terms-and-conditions" element={<TermsAndConditions />} />
                 <Route path="cookie-policy" element={<CookiePolicy />} />
+                <Route path="accessibility" element={<AccessibilityStatement />} />
                 <Route path="about" element={<About />} />
                 <Route path="it-solutions" element={<IT />} />
                 <Route path="digital-marketing" element={<Marketing />} />
