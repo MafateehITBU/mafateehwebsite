@@ -9,10 +9,10 @@ const MOBILE_MAX_WIDTH = 767
 
 function particleCountForWidth(width) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  if (width <= MOBILE_MAX_WIDTH) return 36
+  if (width <= MOBILE_MAX_WIDTH) return 48
   // Retina Macs paint 2–3× pixels; keep the constellation light.
-  if (dpr >= 2) return 70
-  return 110
+  if (dpr >= 2) return 95
+  return 120
 }
 
 function linkDistanceForWidth(width) {
@@ -135,9 +135,8 @@ export function ParticleField({ isDark = false }) {
         }
       }
 
-      const linkStep = particles.length > 80 ? 2 : 1
-      for (let i = 0; i < particles.length; i += linkStep) {
-        for (let j = i + 1; j < particles.length; j += linkStep) {
+      for (let i = 0; i < particles.length; i += 1) {
+        for (let j = i + 1; j < particles.length; j += 1) {
           const a = particles[i]
           const b = particles[j]
           const dx = a.x - b.x
