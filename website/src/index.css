@@ -1174,7 +1174,7 @@ html.dark {
   .not-found__glow {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(28px);
     pointer-events: none;
   }
 

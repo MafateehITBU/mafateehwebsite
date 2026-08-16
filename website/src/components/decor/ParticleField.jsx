@@ -8,7 +8,11 @@ const ANGLE_INTERVAL_MS = 3000
 const MOBILE_MAX_WIDTH = 767
 
 function particleCountForWidth(width) {
-  return width <= MOBILE_MAX_WIDTH ? 65 : 200
+  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  if (width <= MOBILE_MAX_WIDTH) return 36
+  // Retina Macs paint 2–3× pixels; keep the constellation light.
+  if (dpr >= 2) return 70
+  return 110
 }
 
 function linkDistanceForWidth(width) {
@@ -71,7 +75,7 @@ export function ParticleField({ isDark = false }) {
     const parent = canvas.parentElement
     if (!parent) return undefined
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
     let width = 0
     let height = 0
     let linkDistance = LINK_DISTANCE_DESKTOP
@@ -131,8 +135,9 @@ export function ParticleField({ isDark = false }) {
         }
       }
 
-      for (let i = 0; i < particles.length; i += 1) {
-        for (let j = i + 1; j < particles.length; j += 1) {
+      const linkStep = particles.length > 80 ? 2 : 1
+      for (let i = 0; i < particles.length; i += linkStep) {
+        for (let j = i + 1; j < particles.length; j += linkStep) {
           const a = particles[i]
           const b = particles[j]
           const dx = a.x - b.x

@@ -74,9 +74,9 @@ function RouteFallback() {
 function App() {
   useEffect(() => {
     AOS.init({
-      duration: 1200,
+      duration: 700,
       once: true,
-      easing: 'ease-in-out',
+      easing: 'ease-out',
       disable: shouldDisableAos,
     })
 

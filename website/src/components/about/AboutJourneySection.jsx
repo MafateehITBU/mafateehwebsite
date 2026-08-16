@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
-import about2 from '../../assets/imgs/about/about2.png'
-import about3 from '../../assets/imgs/about/about3.png'
+import about2 from '../../assets/imgs/about/about2.webp'
+import about3 from '../../assets/imgs/about/about3.webp'
 import { AnimatedCounter } from '../common/AnimatedCounter.jsx'
 import { MultilineText } from '../common/MultilineText.jsx'
 import { useLanguage } from '../../context/useLanguage.js'

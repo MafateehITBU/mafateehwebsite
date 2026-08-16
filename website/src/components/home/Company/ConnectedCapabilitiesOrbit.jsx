@@ -322,21 +322,17 @@ export function ConnectedCapabilitiesOrbit({
       const y = Math.sin(rad) * orbitRadius
 
       let opacity = 1
-      let blurPx = 0
 
       if (inFrame) {
         opacity = 1
-        blurPx = 0
       } else if (dist < FRAME_APPROACH_DEG) {
         const t = (dist - FRAME_PASS_DEG) / (FRAME_APPROACH_DEG - FRAME_PASS_DEG)
         opacity = 0.45 + (1 - t) * 0.55
-        blurPx = t * 0.65
       } else {
         opacity = 0.35 + (1 - Math.min(dist, 85) / 85) * 0.5
-        blurPx = Math.min(2, dist / 32)
       }
 
-      return { item, index, x, y, opacity, blurPx, inFrame, dist }
+      return { item, index, x, y, opacity, inFrame, dist }
     })
   }, [items, rotation, orbitRadius, activeSlot])
 
@@ -391,7 +387,7 @@ export function ConnectedCapabilitiesOrbit({
               .join(' ')}
             aria-hidden={false}
           >
-            {orbitNodes.map(({ item, index, x, y, opacity, blurPx, inFrame }) => (
+            {orbitNodes.map(({ item, index, x, y, opacity, inFrame }) => (
               <div
                 key={`${index}-${item.href}`}
                 className={[
@@ -413,10 +409,7 @@ export function ConnectedCapabilitiesOrbit({
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  style={{
-                    opacity,
-                    filter: inFrame || blurPx <= 0.15 ? undefined : `blur(${blurPx}px)`,
-                  }}
+                  style={{ opacity }}
                 >
                   {inFrame ? (
                     <Link

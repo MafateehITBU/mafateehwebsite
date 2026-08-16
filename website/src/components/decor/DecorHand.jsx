@@ -1,4 +1,4 @@
-import handImg from '../../assets/imgs/hand.png'
+import handImg from '../../assets/imgs/hand.webp'
 
 /** Optical offset below flex center (PNG has extra space above the hand) */
 const VERTICAL_OFFSET =
@@ -24,6 +24,7 @@ export function DecorHand({ isRtl }) {
         }`}
         width={832}
         height={832}
+        loading="lazy"
         decoding="async"
         draggable={false}
       />

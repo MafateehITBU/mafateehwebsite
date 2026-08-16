@@ -1,4 +1,4 @@
-import about1 from '../../assets/imgs/about/about1.png'
+import about1 from '../../assets/imgs/about/about1.webp'
 import { useLanguage } from '../../context/useLanguage.js'
 import { getAboutPageContent } from '../../content/aboutPage.js'
 

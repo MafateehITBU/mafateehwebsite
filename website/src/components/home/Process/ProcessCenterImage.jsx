@@ -1,4 +1,4 @@
-import processImg from '../../../assets/imgs/home/Process.png'
+import processImg from '../../../assets/imgs/home/Process.webp'
 
 export function ProcessCenterImage({ className = '' }) {
   return (
