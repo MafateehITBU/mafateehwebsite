@@ -1,0 +1,71 @@
+=== HTTP Route Tests 2026-08-18T06:29:52Z ===
+--- https://www.mafateehgroup.com/robots.txt ---
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:42 GMT
+Content-Type: text/plain
+Content-Length: 75
+Connection: keep-alive
+Last-Modified: Sun, 16 Aug 2026 08:37:28 GMT
+ETag: "6a8176c8-4b"
+
+--- https://www.mafateehgroup.com/sitemap.xml ---
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:43 GMT
+Content-Type: text/xml
+Content-Length: 4301
+Connection: keep-alive
+Last-Modified: Sun, 16 Aug 2026 08:37:28 GMT
+ETag: "6a8176c8-10cd"
+
+--- https://www.mafateehgroup.com/en/about ---
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:43 GMT
+Content-Type: text/html
+Content-Length: 3592
+Connection: keep-alive
+Last-Modified: Sun, 16 Aug 2026 08:37:28 GMT
+ETag: "6a8176c8-e08"
+
+--- https://www.mafateehgroup.com/en/blogs ---
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:44 GMT
+Content-Type: text/html
+Content-Length: 3592
+Connection: keep-alive
+Last-Modified: Sun, 16 Aug 2026 08:37:28 GMT
+ETag: "6a8176c8-e08"
+
+--- https://www.mafateehgroup.com/wp-admin ---
+HTTP/1.1 404 Not Found
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:44 GMT
+Content-Type: text/html
+Content-Length: 153
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+
+--- https://www.mafateehgroup.com/.env ---
+HTTP/1.1 404 Not Found
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:45 GMT
+Content-Type: text/html
+Content-Length: 153
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+
+--- https://www.mafateehgroup.com/not-a-real-page-xyz-12345 ---
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 06:33:45 GMT
+Content-Type: text/html
+Content-Length: 3592
+Connection: keep-alive
+Last-Modified: Sun, 16 Aug 2026 08:37:28 GMT
+ETag: "6a8176c8-e08"
+

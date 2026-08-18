@@ -1,0 +1,3 @@
+MAF-TECH-047: Public website fonts self-hosted via @fontsource
+Removed from website/index.html: fonts.googleapis.com, fonts.gstatic.com
+Added to website/src/main.jsx: @fontsource/montserrat (400-700), @fontsource/roboto (400,500,700)
