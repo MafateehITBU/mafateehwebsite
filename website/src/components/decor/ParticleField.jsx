@@ -66,6 +66,9 @@ export function ParticleField({ isDark = false }) {
     const canvas = canvasRef.current
     if (!canvas) return undefined
 
+    // Skip on mobile — canvas animation is a major main-thread cost on low-end devices
+    if (window.innerWidth <= MOBILE_MAX_WIDTH) return undefined
+
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (reduceMotion.matches) return undefined
 

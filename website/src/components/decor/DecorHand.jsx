@@ -19,7 +19,7 @@ export function DecorHand({ isRtl }) {
       aria-hidden
     >
       <img
-        src={HAND_SRC}
+        src={HAND_SRC_SM}
         srcSet={`${HAND_SRC_SM} 320w, ${HAND_SRC} 720w`}
         sizes="(max-width: 640px) min(78vw, 320px), min(68vw, 720px)"
         alt=""

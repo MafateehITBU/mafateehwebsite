@@ -335,23 +335,38 @@ export function SeoProvider({ children }) {
 
     if (!tagId || !analyticsAllowed) return undefined
 
-    window.dataLayer = window.dataLayer || []
-    if (typeof window.gtag !== 'function') {
-      window.gtag = function gtag() {
-        // eslint-disable-next-line prefer-rest-params
-        window.dataLayer.push(arguments)
-      }
-    }
-    window.gtag('js', new Date())
-    window.gtag('config', tagId)
+    const injectGtag = () => {
+      // Guard: may have already been injected in this session
+      if (document.querySelector(`script[${GTAG_SCRIPT_ATTR}="${tagId}"]`)) return
 
-    const script = document.createElement('script')
-    script.async = true
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(tagId)}`
-    script.setAttribute(GTAG_SCRIPT_ATTR, tagId)
-    document.head.appendChild(script)
+      window.dataLayer = window.dataLayer || []
+      if (typeof window.gtag !== 'function') {
+        window.gtag = function gtag() {
+          // eslint-disable-next-line prefer-rest-params
+          window.dataLayer.push(arguments)
+        }
+      }
+      window.gtag('js', new Date())
+      window.gtag('config', tagId)
+
+      const script = document.createElement('script')
+      script.async = true
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(tagId)}`
+      script.setAttribute(GTAG_SCRIPT_ATTR, tagId)
+      document.head.appendChild(script)
+    }
+
+    // On mobile defer GA until the browser is idle to keep TTI low
+    const isMobile = window.innerWidth <= 767
+    let idleId
+    if (isMobile && typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(injectGtag, { timeout: 4000 })
+    } else {
+      injectGtag()
+    }
 
     return () => {
+      if (idleId) window.cancelIdleCallback?.(idleId)
       document
         .querySelectorAll(`script[${GTAG_SCRIPT_ATTR}]`)
         .forEach((el) => el.remove())
