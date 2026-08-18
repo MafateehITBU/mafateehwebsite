@@ -1,0 +1,20 @@
+# Initial Route JavaScript — Build Output 2026-08-18
+
+Home route (`/en/`) loads these JS chunks from modulepreload + entry:
+
+| File | Raw size | Gzip (transfer) |
+|------|----------|-----------------|
+| index-*.js | 63.82 KB | 21.84 KB |
+| react-*.js | 211.29 KB | 67.13 KB |
+| router-*.js | 37.33 KB | 13.43 KB |
+| vendor-*.js | 75.97 KB | 25.90 KB |
+| **Total initial JS (gzip)** | — | **~128.3 KB** |
+
+Target: < 500 KB transferred initial-route JS → **PASS**
+
+CSS (separate, render-blocking):
+- index-*.css ≈ 122 KB raw (~30 KB gzip with compression)
+
+Issues: MAF-TECH-018, MAF-TECH-025 — **PASS** (measured from `npm run build`)
+
+Note: Below-fold chunks (swiper, motion, aos) are lazy-loaded and not in initial route payload.

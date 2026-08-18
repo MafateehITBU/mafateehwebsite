@@ -1,0 +1,256 @@
+MAFATEEH — Developer Final Corrections
+Developer Action & Correction Brief | 18 August 2026
+FINAL STATUSDO NOT ACCEPT
+Final Acceptance remains blocked by incomplete remediation, unsupported Production claims and documentation inconsistencies.
+1. VERIFIED — Keep As Is
+Issue ID
+Status
+Short Note
+Issue ID
+Status
+Short Note
+MAF-TECH-001
+VERIFIED
+robots.txt is live and returns valid text.
+MAF-TECH-002
+VERIFIED
+sitemap.xml is live and returns XML.
+MAF-TECH-009
+VERIFIED
+/blog redirects to the working blog listing.
+MAF-TECH-010
+VERIFIED
+Dedicated contact page and form exist.
+MAF-TECH-013
+VERIFIED
+Route-level code splitting is confirmed.
+MAF-TECH-021
+VERIFIED
+Hashed assets and immutable caching are confirmed.
+MAF-TECH-032
+VERIFIED
+Accessibility statement pages are available.
+MAF-TECH-033
+VERIFIED
+favicon.ico is available in Production.
+MAF-TECH-034
+VERIFIED
+Web manifest is available and valid JSON.
+MAF-TECH-039
+VERIFIED
+No pre-consent Analytics in raw HTML is accepted by design.
+MAF-TECH-041
+VERIFIED
+Lead capture form exists.
+MAF-TECH-042
+VERIFIED
+Production logo files are below 50 KB.
+MAF-TECH-045
+VERIFIED
+Favicon MIME type is correct.
+MAF-TECH-047
+VERIFIED
+Fonts are self-hosted; Google font requests are absent.
+Accepted items require no current rework. Retain their implementation and evidence references in the resubmission.
+2. ACTION REQUIRED — PARTIALLY VERIFIED (1/2)
+Complete the action and submit the specified evidence. Do not change the audit status without QA verification.
+Issue ID
+Status
+Problem
+What Developer Must Do
+Evidence Required
+MAF-TECH-005
+PARTIALLY VERIFIED
+Probe paths return 404; arbitrary invalid routes still return 200.
+Fix every invalid route to return a genuine HTTP 404.
+HTTP results for 10+ valid/invalid URLs and regression results.
+MAF-TECH-006
+PARTIALLY VERIFIED
+HTTP→HTTPS works; the HTTPS apex host still returns 200 instead of redirecting to www.
+Deploy the HTTPS apex→www 301 redirect and verify all four variants.
+curl -I matrix for all scheme/host variants with final 301 targets.
+MAF-TECH-008
+PARTIALLY VERIFIED
+Known probes are blocked; random invalid routes still create a crawl trap with HTTP 200.
+Fix invalid-route handling so all non-existent routes return HTTP 404.
+Crawler-style URL sweep with status, canonical and robots results.
+MAF-TECH-012
+PARTIALLY VERIFIED
+SEO mitigations exist, but Production raw HTML still contains an empty React root.
+Implement crawler-visible rendering, or provide approved CSR risk acceptance.
+Representative raw HTML, or signed management risk acceptance.
+MAF-TECH-017
+PARTIALLY VERIFIED
+Generic social tags exist; route-specific raw tags and debugger validation are missing.
+Add crawler-visible route-specific OG/Twitter tags and verify sharing output.
+View Source per route plus Facebook/LinkedIn/X debugger results.
+MAF-TECH-018
+PARTIALLY VERIFIED
+Code splitting exists, but the current initial-route JavaScript total is not proven against the <500 KB target.
+Provide a current build report tied to the deployed commit and calculate initial-route JS.
+Current build manifest, transferred bytes and before/after comparison.
+MAF-TECH-019
+PARTIALLY VERIFIED
+Asset caching works; public root images use 7 days instead of the required 30-day policy.
+Update and verify the cache policy for HTML, assets and public images.
+Response-header matrix for HTML, JS/CSS, images and static files.
+MAF-TECH-022
+PARTIALLY VERIFIED
+Desktop LCP passes; the submitted Mobile LCP is 4.0s and fails the <2.5s target.
+Fix Mobile LCP and retest the deployed site under documented conditions.
+Lighthouse HTML/JSON or PSI URL showing LCP <2.5s on mobile and desktop.
+MAF-TECH-023
+PARTIALLY VERIFIED
+The screenshots show passing TBT, but the URL, date and full export are missing.
+Provide a reproducible Production Lighthouse result.
+Lighthouse HTML/JSON with URL, device, timestamp and TBT.
+MAF-TECH-024
+PARTIALLY VERIFIED
+Fonts are self-hosted with display swap, but critical-font preload is absent.
+Add critical-font preload or formally update the approved requirement and claim.
+View Source and Network waterfall proving swap and preload/no blocking.
+MAF-TECH-025
+PARTIALLY VERIFIED
+Chunking is present; Mobile initial JavaScript payload is not measured.
+Measure and reduce the Mobile initial payload, or document an approved measured alternative.
+Mobile DevTools/Lighthouse transferred bytes and chunk list.
+MAF-TECH-026
+PARTIALLY VERIFIED
+Mobile code readiness is partial; GSC parity and CSR risk closure are not proven.
+Provide GSC parity evidence and close the CSR risk through rendering or approval.
+GSC mobile/desktop comparison and representative rendered HTML.
+MAF-TECH-027
+PARTIALLY VERIFIED
+Some schema exists; dynamic types are not crawler-visible and Rich Results proof is missing.
+Make required schema crawler-visible and validate every required route type.
+Rich Results/Schema validation exports for each route type.
+3. PARTIALLY VERIFIED — Remaining Actions (2/2)
+Issue ID
+Status
+Problem
+What Developer Must Do
+Evidence Required
+MAF-TECH-030
+PARTIALLY VERIFIED
+Consent code and banner exist; Analytics blocking before consent is not runtime-tested.
+Verify the full consent flow on Production before and after acceptance.
+Screens/video, Network log and Cookie Policy URL.
+MAF-TECH-035
+PARTIALLY VERIFIED
+Known system probes return 404; arbitrary invalid system paths still return the SPA shell.
+Fix all invalid system-route HTTP handling.
+System/invalid-path matrix with HTTP status results.
+MAF-TECH-036
+PARTIALLY VERIFIED
+Arabic routes exist, but raw /ar HTML still shows lang=en, no dir/hreflang and /en canonical.
+Make Arabic canonical, hreflang, lang and dir crawler-visible in raw HTML.
+Raw/rendered EN–AR HTML matrix for canonical, hreflang, lang and dir.
+MAF-TECH-038
+PARTIALLY VERIFIED
+Runtime language switching exists; raw Arabic source and saved toggle evidence are incomplete.
+Fix the Arabic source signals and verify the language toggle.
+Video/DOM capture before and after toggle plus raw source.
+MAF-TECH-043
+PARTIALLY VERIFIED
+An optimization pipeline exists; the current and legacy Portfolio image inventory was not provided.
+Audit the current Portfolio inventory or document the approved business decision not to display it.
+Portfolio image list with URLs, sizes, formats, dimensions and results.
+MAF-TECH-044
+PARTIALLY VERIFIED
+Responsive-image code exists; Production coverage across all target components is not proven.
+Complete the implementation and verify representative Production pages.
+Rendered HTML and Network evidence for formats, srcset and sizes.
+MAF-TECH-046
+PARTIALLY VERIFIED
+Self-hosting and display swap are present; the claimed critical-font preload is not.
+Add and verify preload, or update the claim/status to reflect the implemented scope.
+View Source and Network waterfall for critical fonts.
+MAF-TECH-050
+PARTIALLY VERIFIED
+Accessibility scores are shown, but the screenshots omit reproducible URL/date/report context.
+Provide a complete Production Lighthouse or axe export.
+Lighthouse HTML/JSON or axe report with URL, date and device.
+MAF-TECH-052
+PARTIALLY VERIFIED
+Technical debt was reduced, but CSR remains and no formal architecture/risk document was supplied.
+Provide an ADR and signed risk/maintenance plan, or implement rendering migration.
+Signed ADR/risk acceptance with owner and review date.
+4. NOT VERIFIED / NOT DONE / INCORRECT IMPLEMENTATION
+Issue ID
+Status
+Problem
+What Developer Must Do
+Evidence Required
+MAF-TECH-003
+INCORRECT IMPLEMENTATION
+The route canonical is dynamic only; raw Production source still uses /en/ for multiple routes.
+Fix server/prerendered self-referencing canonicals and enforce the canonical www host.
+Expected/actual canonical matrix from View Source for every representative route.
+MAF-TECH-011
+NOT VERIFIED
+Blog routes exist in code, but published post links/slugs were not tested.
+Verify every published blog URL and fix any broken slug or redirect.
+Complete blog URL list with HTTP/browser result for each link.
+MAF-TECH-048
+NOT DONE
+HSTS is absent from normal Production responses.
+Deploy HSTS on the actual Production response path and verify inheritance.
+curl -I for normal Production pages showing Strict-Transport-Security.
+MAF-TECH-049
+INCORRECT IMPLEMENTATION
+Security headers exist in configuration but are absent from normal Production 200 pages.
+Fix Nginx/proxy header inheritance, deploy it and retest normal pages.
+securityheaders.com export and curl headers for multiple 200 pages.
+5. PENDING EXTERNAL
+Do not mark these items closed until the named access, data or approval is supplied.
+Issue ID
+Dependency
+What Is Needed
+MAF-TECH-004
+GSC account/access
+Provide verified property access, submit the sitemap and export Pages/Indexing data.
+MAF-TECH-020
+Cloudflare access
+Apply the cache rules and provide dashboard plus repeated-response Cache HIT headers.
+MAF-TECH-028
+Approved business social URLs
+Supply the official URLs, publish sameAs and validate the final rendered JSON-LD.
+MAF-TECH-031
+Legal/Management approval
+Provide approved Terms & Conditions text, then publish and capture the final page.
+MAF-TECH-040
+GA4 access and live Tag ID
+Run Production events and provide GA4 Realtime evidence with timestamps.
+6. Documentation Corrections
+Issue / Sheet
+Required Correction
+8. Summary — Implementation
+Replace 26/13/2/2/2 with the verified tracker counts: 26/14/2/2/1.
+8. Summary — Verification
+Replace 28/9/4/2/2 with 29/9/4/2/1.
+8. Summary — Decisions
+Replace 26/11/4/4 with 27/11/3/4.
+8. Summary — Metadata
+Update Last Updated to 18 Aug 2026 and remove duplicate rows 1002–1004.
+9. Change Log
+Correct the summary-count entry, fix the shifted deployment row and record omitted material changes, including MAF-TECH-031.
+2. HML Matrix — MAF-TECH-011/043
+Remove ANALYSIS GAP conflicts and align with the conservative audit status.
+MAF-TECH-048 Severity
+Use the Source-of-Truth SUB-ITEM severity consistently; remove MEDIUM (sub) mismatch.
+6. Gap Analysis
+Restore the exact source titles for all 12 listed Issues.
+MAF-TECH-024/046 comments
+Remove the unsupported Google-font preload claim or implement and prove preload.
+Repair Manifest
+Downgrade/clarify AR-007, AR-008, AR-009, AR-014, AR-015 and AR-018 so none overstates closure.
+update_closure_workbook.py
+Replace hard-coded outdated summary counts with values calculated from the trackers.
+7. Final Developer Checklist
+☐ Complete all required corrections.
+☐ Update the relevant Excel statuses.
+☐ Update Change Log.
+☐ Provide the required evidence.
+☐ Verify changes on Production where required.
+☐ Submit the updated files for final QA.
+Closure rule: Fix → test → provide verifiable evidence → align Excel/Change Log → submit for final QA. Developer claim alone does not close an Issue.

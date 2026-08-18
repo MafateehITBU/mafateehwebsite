@@ -1,0 +1,106 @@
+====================================================================================================
+https://mafateehgroup.com/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:10 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes
+====================================================================================================
+https://mafateehgroup.com/en/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:10 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes
+====================================================================================================
+https://mafateehgroup.com/ar/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:10 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes
+====================================================================================================
+https://mafateehgroup.com/this-should-404-987654
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:11 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes
+====================================================================================================
+https://mafateehgroup.com/wp-admin
+HTTP/1.1 404 Not Found
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:11 GMT
+Content-Type: text/html
+Content-Length: 153
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+====================================================================================================
+https://mafateehgroup.com/sitemap.xml
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:12 GMT
+Content-Type: text/xml
+Content-Length: 4301
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:55 GMT
+ETag: "6a840d77-10cd"
+Cache-Control: public, max-age=3600
+Accept-Ranges: bytes
+====================================================================================================
+https://mafateehgroup.com/robots.txt
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:12 GMT
+Content-Type: text/plain
+Content-Length: 75
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:55 GMT
+ETag: "6a840d77-4b"
+Cache-Control: public, max-age=86400
+Accept-Ranges: bytes
+====================================================================================================
+https://www.mafateehgroup.com/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:10:13 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes

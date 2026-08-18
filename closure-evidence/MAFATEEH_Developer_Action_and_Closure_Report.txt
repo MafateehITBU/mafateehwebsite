@@ -1,0 +1,417 @@
+FINAL QA / CLOSURE CONTROL
+MAFATEEH — Developer Action & Closure Report
+Evidence-based actions required before final acceptance
+Prepared for
+Website Developer
+Review basis
+Final QA / Acceptance Review
+Scope
+Remaining closure actions only; no new audit findings
+Report date
+17 August 2026
+1. Current Status
+FINAL ACCEPTANCE: DO NOT ACCEPT
+A substantial portion of the remediation has been documented, but final closure is not currently possible. The review found 16 partially completed issues, 26 issues documented without sufficient proof, 11 cross-sheet status conflicts, four incorrect repair artifact/reference mappings, and incomplete production or external verification.
+Closure rule: status labels alone are not evidence. Each item must be implemented, tested, supported by reviewable evidence, and reflected consistently across the workbook.
+Submission rule: provide artifacts that can be checked (files, diffs, URLs, headers, test outputs, screenshots/exports, or written approvals). Narrative explanations alone do not close an item.
+2. What Needs To Be Corrected
+The action register below contains only the remaining closure work. Priority reflects closure urgency for report-level items and does not replace the original Audit Severity.
+A. Documentation / Excel
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+Critical
+Workbook / 11 conflicts
+The latest workbook is byte-for-byte identical to the previous submission. The 11 documented status conflicts remain.
+Correct all 11 conflict rows across HML, Dev Decisions, Implementation, Verification, Gap Analysis, and Repair Manifest. Submit a genuinely revised workbook.
+New XLSX plus a cell-level change log showing sheet, Issue ID, old value, new value, reason, and evidence reference.
+Developer
+OPEN
+High
+Summary
+Implementation and Verification totals are aggregated incorrectly.
+Replace the summaries with: Implementation — RESOLVED 26; PARTIALLY RESOLVED 13; PENDING 2; ALREADY RESOLVED 2; NOT APPLICABLE 2. Verification — VERIFIED (CODE) 28; PARTIALLY VERIFIED 9; PENDING EXTERNAL 4; NOT VERIFIED 2; N/A 2.
+Updated Summary cells and an Issue-level count export or formula check that totals 45.
+Developer
+OPEN
+High
+Deployment wording
+Current wording says: “DEPLOYED / READY — SEO Phase 1–3 implemented Aug 2026,” which implies a closure state not supported by the pending checks.
+Use exactly: “Implementation deployed; code-level verification completed where recorded. Post-deployment, production, and external verification remain pending. Final acceptance is not yet complete.”
+Updated wording wherever deployment/readiness is stated, with matching wording across Summary and trackers.
+Developer
+OPEN
+High
+Evidence package / 26 Issues
+Implementation is claimed or documented for 26 Issues, but the supplied package does not include sufficient source, configuration, commit, diff, or independent after-test evidence.
+Attach evidence mapped by Issue ID for: 001, 002, 003, 006, 009, 010, 011, 013, 017, 019, 021, 024, 027, 030, 032, 033, 034, 036, 038, 040, 041, 044, 045, 046, 048, 049.
+Source/config files or commit/diff plus the required code, production, or external test result for each Issue.
+Developer
+NOT PROVEN
+Medium
+Change Log
+No correction log demonstrates what changed after the prior review.
+Add a Change Log sheet or separate file with one row per correction and a direct evidence reference.
+Completed Change Log linked to the revised workbook and evidence package.
+Developer
+OPEN
+B. MAF-TECH-047 / AR-017
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+Critical
+MAF-TECH-047 / AR-017
+AR-017 adds font preload and display=swap, but it does not self-host the fonts. It is an alternative performance mitigation, not a direct repair of the original self-hosting requirement.
+Choose one option only. Option 1: self-host the fonts and remove live Google Fonts requests. Option 2: obtain written Management/Legal approval to accept the residual dependency/privacy risk; classify the Issue as N/A — RISK ACCEPTED. Do not mark it VERIFIED.
+Option 1: source diff plus browser Network/HAR proof showing no requests to Google Fonts. Option 2: signed approval plus corrected tracker and manifest mapping.
+Developer + Management/Legal
+WRONG DECISION
+C. MAF-TECH-020 / AR-006
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+High
+MAF-TECH-020 / AR-006
+Origin cache headers are claimed, but Cloudflare configuration and a live cache HIT are not proven. AR-006 is marked COMPLETED even though the external work remains.
+Configure and activate the required Cloudflare rules, run repeated production requests, and update both the Issue and AR-006 to reflect the actual state. AR-006 may be completed for 019/021 only if their evidence is supplied; 020 remains partial/pending until Cloudflare verification passes.
+Cloudflare rule screenshot/export, production response headers, and repeated-request proof showing CF-Cache-Status: HIT (or equivalent cache HIT evidence).
+Developer + Cloudflare Admin
+PARTIALLY DONE / PENDING EXTERNAL
+D. MAF-TECH-028 / AR-009
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+High
+MAF-TECH-028 / AR-009
+The Organization schema wiring is claimed, but official social URLs are not supplied and the final sameAs array is not proven. AR-009 cannot close 028 as completed.
+Obtain the approved official social URLs, add them to sameAs, render the final JSON-LD, and validate it. If URLs are not available, record the Issue as PENDING BUSINESS DATA instead of completed.
+Approved URL list, rendered production JSON-LD with actual URLs, and schema validation output.
+Client/Marketing + Developer
+PARTIALLY DONE / PENDING BUSINESS DATA
+E. AR-016
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+High
+AR-016
+AR-016 is CANCELLED but is still referenced as if it proves successful remediation and still lists Issues Solved.
+Keep AR-016 as CANCELLED. Remove it as closure evidence and document the actual alternative for each linked Issue separately: 012, 022, 026, 027, 036, 038, 050, 052.
+Corrected Repair Manifest plus issue-specific alternative artifact or evidence reference for every linked Issue.
+Developer
+CANCELLED / MISREFERENCED
+F. Performance
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+High
+MAF-TECH-018
+Performance remediation is partial and HML incorrectly presents it as fully verified.
+Run the required build, Network, and Lighthouse/PageSpeed checks under the audit test condition. Update status from the measured result.
+Build output, before/after results if available, production Lighthouse/PageSpeed report, and Network evidence.
+Developer
+PARTIALLY DONE
+High
+MAF-TECH-022
+A mitigation is claimed, but AR-016 is cancelled and the production performance effect is not proven.
+Document the actual alternative mitigation and test its effect under the required performance condition.
+Source/config diff plus build and production performance test output.
+Developer
+PARTIALLY DONE
+High
+MAF-TECH-023
+Performance work is recorded as partial without a complete production result.
+Complete the remaining implementation, run build/network checks, and submit Lighthouse/PageSpeed evidence applicable to the original requirement.
+Source/config diff, build output, Network capture, and production performance result.
+Developer
+PARTIALLY DONE
+Medium
+MAF-TECH-025
+Implementation and verification are partial, while HML says VERIFIED.
+Complete or explicitly scope the remaining performance work; test the production result and align all tracker statuses.
+Before/after if available, build/Network evidence, Lighthouse/PageSpeed result, and corrected workbook statuses.
+Developer
+PARTIALLY DONE
+G. Invalid URLs / HTTP Errors
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+High
+MAF-TECH-005
+Route handling is only partially verified, but HML says VERIFIED.
+Test representative valid and invalid URLs, correct any route behavior, and confirm that invalid routes return the required HTTP status.
+curl or equivalent HTTP output showing URL, status code, and response for valid and invalid cases.
+Developer
+PARTIALLY DONE
+Medium
+MAF-TECH-008
+HTTP/error-route behavior is only partially verified, but HML says VERIFIED.
+Run the required valid/invalid route test set, correct failures, and align the workbook to the measured outcome.
+curl/equivalent HTTP output and production URLs for each tested case.
+Developer
+PARTIALLY DONE
+Low
+MAF-TECH-035
+Invalid-route handling is only partially verified, but HML says VERIFIED.
+Verify production status codes for valid and invalid routes and correct any mismatch.
+curl/equivalent HTTP evidence showing the final production status codes.
+Developer
+PARTIALLY DONE
+H. Other Partial / External Issues
+Priority
+Issue / Artifact
+Current Problem
+Required Action
+Required Evidence
+Owner
+Status
+Critical
+MAF-TECH-012
+The client-side rendering/content-without-JavaScript concern remains partial. AR-016 is cancelled, yet HML says VERIFIED.
+Complete the required indexable-content solution or document an approved alternative. Align HML, implementation, verification, and artifact references.
+Raw HTML and rendered HTML comparison, source diff, and applicable GSC/URL Inspection evidence.
+Developer
+PARTIALLY DONE
+Medium
+MAF-TECH-026
+Mobile indexing/rendering closure is partial and AR-016 cannot be used as proof.
+Document and test the actual alternative implementation, then obtain the applicable production/GSC confirmation.
+Source diff, mobile rendered output, production URL, and GSC evidence where applicable.
+Developer + GSC Access Owner
+PARTIALLY DONE
+Low
+MAF-TECH-031
+The page/editor implementation is claimed, but final approved legal content is pending.
+Obtain approved Terms & Conditions content, publish it, and update the Issue after client/legal approval.
+Written content approval plus final production URL and rendered page capture.
+Client/Legal + Developer
+PARTIALLY DONE
+Medium
+MAF-TECH-042
+The delivered logo is recorded at approximately 82 KB; the original acceptance target was below 50 KB in SVG/WebP, or a formally approved alternative.
+Meet the original target or obtain documented Management approval for an equivalent alternative, then update the Issue status.
+Final asset file, file size, format, production Network evidence, and approval if the target is not met.
+Developer + Management if exception
+PARTIALLY DONE
+Medium
+MAF-TECH-043
+An image pipeline is claimed, but complete portfolio-image coverage is not proven.
+Inventory all affected images, confirm optimization output, and close only the images covered by evidence.
+Before/after inventory, optimized files, sizes/formats, and production Network captures.
+Developer
+PARTIALLY DONE
+Medium
+MAF-TECH-050
+Accessibility/semantic remediation is partial and AR-016 cannot serve as proof.
+Complete the remaining accessibility work and run an accessibility test on the affected production pages.
+Source diff plus axe or Lighthouse Accessibility results and production page captures.
+Developer
+PARTIALLY DONE
+Medium
+MAF-TECH-052
+Technical/SSR debt is only partially reduced. AR-016 is cancelled, while HML says VERIFIED.
+Document the residual debt and maintenance plan, complete the required remaining work, or obtain formal Management acceptance of the residual scope. Align all tracker statuses.
+Source/architecture evidence, residual-debt plan, corrected workbook, and written Management approval if residual risk is accepted.
+Developer + Management
+PARTIALLY DONE
+Medium
+MAF-TECH-004
+The developer-side work may be complete, but the required external verification result is not in the package.
+Perform the applicable external/production verification when access and data are available. Keep the Issue pending until the result is recorded.
+GSC or other applicable external-platform evidence linked to the production URL and test date.
+External Platform Access Owner + Developer
+PENDING EXTERNAL
+3. Cross-Sheet Conflicts
+Apply the most conservative evidence-supported status shown below. Do not use VERIFIED for partial, pending, or N/A items.
+Issue
+Current Conflict
+Required Final Status
+Required Correction
+MAF-TECH-012
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status; keep Implementation and Verification aligned.
+MAF-TECH-005
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status; retain partial statuses until HTTP evidence passes.
+MAF-TECH-018
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status; close only after performance evidence.
+MAF-TECH-008
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status; retain partial until route/status tests pass.
+MAF-TECH-025
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status and link the performance test evidence.
+MAF-TECH-052
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status and record the residual debt/action.
+MAF-TECH-035
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PARTIALLY VERIFIED.
+PARTIALLY RESOLVED / PARTIALLY VERIFIED
+Change HML from VERIFIED to a partial status; close only after HTTP evidence.
+MAF-TECH-020
+HML = VERIFIED; Implementation = PARTIALLY RESOLVED; Verification = PENDING EXTERNAL.
+PARTIALLY RESOLVED / PENDING EXTERNAL
+Change HML from VERIFIED; record Cloudflare work and cache-HIT verification as pending.
+MAF-TECH-027
+Gap Analysis = NEEDS DEV; Implementation = RESOLVED; Verification = VERIFIED (CODE).
+CODE IMPLEMENTED — RICH RESULTS VALIDATION PENDING
+Update Gap Analysis to the required final status; keep external Rich Results validation as the next action, not as a contradiction.
+MAF-TECH-039
+Gap Analysis = NEEDS DEV; Decision / Implementation / Verification = N/A.
+N/A — BY DESIGN
+Update Gap Analysis to N/A — BY DESIGN. Keep proof under MAF-TECH-040 that analytics works after consent.
+MAF-TECH-047
+HML = VERIFIED; Implementation / Verification = N/A; AR-017 is mapped as direct repair.
+WRONG DECISION / OPEN, or N/A — RISK ACCEPTED after approval
+Remove VERIFIED. Either implement self-hosting or obtain written risk acceptance. Record AR-017 only as an alternative mitigation.
+4. Repair Artifact Corrections
+Artifact
+Current Problem
+Required Correction
+AR-006
+Marked COMPLETED and lists 019/020/021 although 020 still requires Cloudflare configuration and cache-HIT proof.
+Retain completion only for 019/021 if their evidence is supplied. Mark the 020 portion PARTIALLY COMPLETED / PENDING EXTERNAL until Cloudflare verification passes.
+AR-009
+Marked COMPLETED and lists 027/028 although 028 lacks official social URLs and final sameAs evidence.
+Keep 028 partial or PENDING BUSINESS DATA until the approved URLs, rendered JSON-LD, and validation are supplied. Link 027 to its actual schema evidence.
+AR-016
+CANCELLED, but still lists Issues Solved and is used as successful repair evidence.
+Keep CANCELLED; remove it as closure proof; document issue-specific alternatives for 012, 022, 026, 027, 036, 038, 050, and 052.
+AR-017
+Preload/display=swap is recorded as if it directly solves the MAF-TECH-047 self-hosting requirement.
+Keep AR-017 as a direct repair for 024/046 only if evidence supports them. Remove 047 from Issues Solved or label it Alternative Mitigation; resolve 047 separately.
+5. Evidence Required Before Final Acceptance
+Check
+Evidence
+Why It Is Required
+☐
+Corrected Excel
+Confirms that issue-level statuses and calculations now reflect the actual closure state.
+☐
+Change Log
+Shows exactly what changed, where it changed, and which evidence supports each correction.
+☐
+Source Code / Commit / Diff
+Proves that the claimed implementation exists in the delivered code or configuration.
+☐
+Production URL verification
+Confirms that the delivered behavior is present on the live environment, not only in documentation.
+☐
+Redirect evidence
+Confirms redirect targets, status codes, and the absence of unintended chains or errors.
+☐
+Response headers
+Confirms the server/CDN behavior recorded in the relevant security, cache, and HTTP Issues.
+☐
+Cloudflare evidence
+Confirms that the required external rules are active and producing a live cache HIT.
+☐
+Lighthouse/PageSpeed results
+Confirms the measured production outcome for the performance Issues.
+☐
+Rich Results / Schema validation
+Confirms that the rendered structured data is valid and testable.
+☐
+GSC evidence where applicable
+Confirms Google Search Console inspection or indexing outcomes that code review alone cannot prove.
+☐
+GA4 Realtime evidence where applicable
+Confirms analytics events after the required consent condition on production.
+☐
+Accessibility test
+Confirms the affected pages pass the required axe or Lighthouse accessibility checks.
+☐
+Network evidence for fonts
+Confirms whether Google Fonts requests remain and whether self-hosting is actually implemented.
+☐
+Social URLs / final JSON-LD
+Confirms that MAF-TECH-028 contains approved business URLs rather than placeholders or an empty sameAs value.
+☐
+Management/Legal approval
+Required only where a residual risk, exception, or N/A decision depends on formal acceptance outside the developer’s authority.
+6. Definition of Done
+The required remediation has been implemented.
+The remediation has been tested under the applicable code, production, or external condition.
+Reviewable evidence is attached and mapped to the Issue ID.
+All delivery documents reflect the actual state.
+HML, Implementation, Verification, and Gap Analysis contain no status conflict.
+The linked Repair Artifact is correct and covers the stated requirement.
+No Issue or Artifact is marked VERIFIED or COMPLETED without appropriate evidence.
+7. Final Developer Checklist
+Check
+Closure Item
+Status
+☐
+Excel corrected
+OPEN
+☐
+11 conflicts resolved
+OPEN
+☐
+4 artifact mappings corrected
+OPEN
+☐
+Partial issues updated
+OPEN
+☐
+MAF-TECH-047 resolved or formally risk-accepted
+OPEN
+☐
+MAF-TECH-020 verified
+OPEN
+☐
+MAF-TECH-028 verified
+OPEN
+☐
+AR-016 corrected
+OPEN
+☐
+Evidence package attached
+OPEN
+☐
+Production tests completed
+OPEN
+☐
+Summary reconciled
+OPEN
+☐
+Deployment status corrected
+OPEN
+☐
+Final Change Log attached
+OPEN
+FINAL ACCEPTANCE WILL BE REASSESSED AFTER THE ABOVE ITEMS ARE COMPLETED AND EVIDENCE IS PROVIDED.

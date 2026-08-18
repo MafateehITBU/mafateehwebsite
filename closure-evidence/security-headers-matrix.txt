@@ -1,0 +1,91 @@
+# Security & Cache Header Matrix — 2026-08-18 09:22 UTC
+
+================================================================================
+https://www.mafateehgroup.com/en/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:26:28 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes
+
+
+================================================================================
+https://www.mafateehgroup.com/en/about
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:26:28 GMT
+Content-Type: text/html
+Content-Length: 2955
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:56 GMT
+Vary: Accept-Encoding
+ETag: "6a840d78-b8b"
+Cache-Control: no-cache, must-revalidate
+CDN-Cache-Control: no-store
+Accept-Ranges: bytes
+
+
+================================================================================
+https://www.mafateehgroup.com/robots.txt
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:26:29 GMT
+Content-Type: text/plain
+Content-Length: 75
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:55 GMT
+ETag: "6a840d77-4b"
+Cache-Control: public, max-age=86400
+Accept-Ranges: bytes
+
+
+================================================================================
+https://www.mafateehgroup.com/sitemap.xml
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:26:29 GMT
+Content-Type: text/xml
+Content-Length: 4301
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:55 GMT
+ETag: "6a840d77-10cd"
+Cache-Control: public, max-age=3600
+Accept-Ranges: bytes
+
+
+================================================================================
+https://www.mafateehgroup.com/logo-mafateeh.webp
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:26:29 GMT
+Content-Type: image/webp
+Content-Length: 24160
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:55 GMT
+ETag: "6a840d77-5e60"
+Cache-Control: public, max-age=604800
+CDN-Cache-Control: public, max-age=604800
+Accept-Ranges: bytes
+
+
+================================================================================
+https://www.mafateehgroup.com/decor-hand-sm.webp
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 18 Aug 2026 09:26:30 GMT
+Content-Type: image/webp
+Content-Length: 18238
+Connection: keep-alive
+Last-Modified: Tue, 18 Aug 2026 07:44:55 GMT
+ETag: "6a840d77-473e"
+Cache-Control: public, max-age=604800
+CDN-Cache-Control: public, max-age=604800
+Accept-Ranges: bytes
+

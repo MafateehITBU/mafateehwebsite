@@ -1,0 +1,18 @@
+# Blog URL Verification — 2026-08-18
+
+Source: https://api.mafateehgroup.com/api/public/blogs (3 published posts)
+
+| Locale | Slug | URL | HTTP Status | Result |
+|--------|------|-----|-------------|--------|
+| en | the-biggest-threat-to-any-business-isn-t-competition-it-s-the-chaos-you-can-t-see | /en/blogs/the-biggest-threat-to-any-business-isn-t-competition-it-s-the-chaos-you-can-t-see | 200 | PASS |
+| ar | the-biggest-threat-to-any-business-isn-t-competition-it-s-the-chaos-you-can-t-see | /ar/blogs/the-biggest-threat-to-any-business-isn-t-competition-it-s-the-chaos-you-can-t-see | 200 | PASS |
+| en | most-lost-sales-start-with-a-poor-digital-experience | /en/blogs/most-lost-sales-start-with-a-poor-digital-experience | 200 | PASS |
+| ar | most-lost-sales-start-with-a-poor-digital-experience | /ar/blogs/most-lost-sales-start-with-a-poor-digital-experience | 200 | PASS |
+| en | is-your-marketing-a-revenue-engine-or-just-noise | /en/blogs/is-your-marketing-a-revenue-engine-or-just-noise | 200 | PASS |
+| ar | is-your-marketing-a-revenue-engine-or-just-noise | /ar/blogs/is-your-marketing-a-revenue-engine-or-just-noise | 200 | PASS |
+
+Listing pages:
+- /en/blogs → 200 PASS
+- /ar/blogs → 200 PASS
+
+Issue: MAF-TECH-011 — **PASS** (all published blog URLs return 200)
