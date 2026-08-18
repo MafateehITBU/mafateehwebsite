@@ -48,10 +48,18 @@
         if (localStorage.getItem('mafateeh-theme') === 'dark') {
           document.documentElement.classList.add('dark')
         }
-        var locale = localStorage.getItem('mafateeh-locale')
+        var path = location.pathname || ''
+        var localeFromPath = /^\/ar(\/|$)/.test(path) ? 'ar' : /^\/en(\/|$)/.test(path) ? 'en' : null
+        var locale = localeFromPath || localStorage.getItem('mafateeh-locale')
         if (locale === 'ar' || locale === 'en') {
           document.documentElement.lang = locale
           document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr'
+          if (localeFromPath === 'ar') {
+            var canonical = document.querySelector('link[rel="canonical"]')
+            if (canonical) canonical.href = 'https://www.mafateehgroup.com/ar/'
+            var ogUrl = document.querySelector('meta[property="og:url"]')
+            if (ogUrl) ogUrl.content = 'https://www.mafateehgroup.com/ar/'
+          }
         }
       } catch (_) {}
     </script>
