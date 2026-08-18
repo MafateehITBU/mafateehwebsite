@@ -1,4 +1,5 @@
 import { InfiniteMarquee } from '../../common/InfiniteMarquee.jsx'
+import { optimizedImageUrl } from '../../../utils/optimizedImageUrl.js'
 
 /**
  * @param {Array<{ id: string, name: string, logoUrl?: string | null }>} partners
@@ -14,13 +15,16 @@ function buildMarqueeSequence(partners) {
 }
 
 function PartnerLogoBox({ name, logoUrl }) {
+  const src = logoUrl ? optimizedImageUrl(logoUrl, { width: 176, quality: 75 }) : ''
   return (
     <div className="flex h-20 w-36 shrink-0 items-center justify-center rounded-lg bg-white px-4 py-3 sm:h-24 sm:w-44 sm:px-5 sm:py-4">
-      {logoUrl ? (
+      {src ? (
         <img
-          src={logoUrl}
+          src={src}
           alt={name}
           className="max-h-full max-w-full object-contain"
+          width={176}
+          height={96}
           loading="lazy"
           decoding="async"
         />

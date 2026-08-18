@@ -1,4 +1,5 @@
-import handImg from '../../assets/imgs/hand.webp'
+/** Served from /public so LCP image can be preloaded with a stable URL. */
+const HAND_SRC = '/decor-hand.webp'
 
 /** Optical offset below flex center (PNG has extra space above the hand) */
 const VERTICAL_OFFSET =
@@ -17,14 +18,15 @@ export function DecorHand({ isRtl }) {
       aria-hidden
     >
       <img
-        src={handImg}
+        src={HAND_SRC}
         alt=""
         className={`block w-[min(78vw,40rem)] max-h-[92dvh] max-w-none select-none object-contain ${VERTICAL_OFFSET} sm:w-[min(68vw,44rem)] lg:w-[min(58vw,52rem)] ${
           isRtl ? '-scale-x-100' : ''
         }`}
         width={832}
         height={832}
-        loading="lazy"
+        loading="eager"
+        fetchPriority="high"
         decoding="async"
         draggable={false}
       />

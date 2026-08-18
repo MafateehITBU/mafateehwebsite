@@ -1,9 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { lazy, Suspense, useEffect } from 'react'
-import AOS from 'aos'
-import 'aos/dist/aos.css'
+import { lazy, Suspense } from 'react'
 
 import { ScrollToTop } from './components/common/ScrollToTop.jsx'
+import { useAosInit } from './hooks/useAosInit.js'
 import { SiteShell } from './components/layout/SiteShell.jsx'
 import { LocaleLayout } from './components/routing/LocaleLayout.jsx'
 import {
@@ -57,12 +56,6 @@ const NotFound = lazy(() =>
   import('./pages/NotFound.jsx').then((m) => ({ default: m.NotFound })),
 )
 
-const AOS_MIN_WIDTH = 1024
-
-function shouldDisableAos() {
-  return window.innerWidth < AOS_MIN_WIDTH
-}
-
 function RouteFallback() {
   return (
     <div className="flex min-h-[40vh] items-center justify-center" aria-busy="true">
@@ -72,21 +65,7 @@ function RouteFallback() {
 }
 
 function App() {
-  useEffect(() => {
-    AOS.init({
-      duration: 700,
-      once: true,
-      easing: 'ease-out',
-      disable: shouldDisableAos,
-    })
-
-    const onResize = () => {
-      AOS.refresh()
-    }
-
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
+  useAosInit()
   return (
     <BrowserRouter>
       <SeoProvider>

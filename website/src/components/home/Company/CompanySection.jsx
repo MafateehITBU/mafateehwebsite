@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useLanguage } from '../../../context/useLanguage.js'
 import { getHomeContent } from '../../../content/index.js'
-import { ConnectedCapabilitiesOrbit } from './ConnectedCapabilitiesOrbit.jsx'
+
+const ConnectedCapabilitiesOrbit = lazy(() =>
+  import('./ConnectedCapabilitiesOrbit.jsx').then((m) => ({
+    default: m.ConnectedCapabilitiesOrbit,
+  })),
+)
 
 function useDesktopOrbit() {
   const [show, setShow] = useState(
@@ -63,11 +68,13 @@ export function CompanySection() {
 
           {showOrbit ? (
             <div className="company-capabilities__orbit-col hidden lg:flex" dir="ltr">
-              <ConnectedCapabilitiesOrbit
-                items={capabilities.items}
-                ariaLabel={capabilities.label}
-                textRtl={isRtl}
-              />
+              <Suspense fallback={null}>
+                <ConnectedCapabilitiesOrbit
+                  items={capabilities.items}
+                  ariaLabel={capabilities.label}
+                  textRtl={isRtl}
+                />
+              </Suspense>
             </div>
           ) : null}
         </div>
