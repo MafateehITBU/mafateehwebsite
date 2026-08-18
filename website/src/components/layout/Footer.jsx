@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import { Link } from 'react-router-dom'
-import logoWhite from '../../assets/imgs/logo-white.png'
+import logoWhite from '../../assets/imgs/logo-white.webp'
 import { getFooterContent } from '../../content/footer.js'
 import { useLanguage } from '../../context/useLanguage.js'
 import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'

@@ -6,6 +6,8 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
+    // Raise CSS/JS split threshold so small utility chunks inline
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -16,6 +18,8 @@ export default defineConfig({
           if (id.includes('aos')) return 'aos'
           if (id.includes('axios') || id.includes('sonner')) return 'vendor'
           if (id.includes('react-dom') || id.includes('/react/')) return 'react'
+          // Keep @iconify in its own chunk (loaded lazily by icon usage)
+          if (id.includes('@iconify')) return 'iconify'
           return undefined
         },
       },

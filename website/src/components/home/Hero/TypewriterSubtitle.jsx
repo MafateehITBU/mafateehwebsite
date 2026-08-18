@@ -1,30 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '../../../context/useLanguage.js'
 import { getHomeContent } from '../../../content/index.js'
 
 const TYPING_MS = 58
 const DELETING_MS = 36
 const PAUSE_AFTER_TYPE_MS = 2200
-
 const MOBILE_MAX_WIDTH = 767
 
 function useTypewriter(text, enabled) {
-  const [displayed, setDisplayed] = useState('')
-  const [phase, setPhase] = useState('typing')
+  // Start with full text to avoid CLS — animation begins only once enabled resolves
+  const [displayed, setDisplayed] = useState(text)
+  const [phase, setPhase] = useState('done')
+  const started = useRef(false)
 
   useEffect(() => {
     if (!enabled) {
       setDisplayed(text)
-      setPhase('typing')
+      setPhase('done')
+      started.current = false
       return undefined
     }
-
-    setDisplayed('')
-    setPhase('typing')
+    // Kick off typing from empty only once
+    if (!started.current) {
+      started.current = true
+      setDisplayed('')
+      setPhase('typing')
+    }
   }, [text, enabled])
 
   useEffect(() => {
-    if (!enabled) return undefined
+    if (!enabled || phase === 'done') return undefined
 
     let timeoutId
 
@@ -57,7 +62,8 @@ function useTypewriter(text, enabled) {
 export function TypewriterSubtitle({ className = '' }) {
   const { locale } = useLanguage()
   const copy = getHomeContent(locale).hero.typewriter
-  const [motionEnabled, setMotionEnabled] = useState(true)
+  // Default true — will be corrected after mount (no CLS on first render)
+  const [motionEnabled, setMotionEnabled] = useState(false)
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -69,15 +75,17 @@ export function TypewriterSubtitle({ className = '' }) {
 
   return (
     <h4
-      className={`block min-h-[1.75rem] font-body text-lg font-medium leading-snug text-secondary sm:min-h-[1.875rem] sm:text-xl md:min-h-[2rem] md:text-2xl ${className}`.trim()}
+      className={`block font-body text-lg font-medium leading-snug text-secondary sm:text-xl md:text-2xl ${className}`.trim()}
     >
       <span className="text-secondary">{copy.prefix}</span>
       <span className="text-secondary">{animatedText}</span>
-      <span
-        className="ms-0.5 inline-block w-[2px] translate-y-px animate-pulse bg-secondary align-middle"
-        style={{ height: '0.85em' }}
-        aria-hidden
-      />
+      {motionEnabled && (
+        <span
+          className="ms-0.5 inline-block w-[2px] translate-y-px animate-pulse bg-secondary align-middle"
+          style={{ height: '0.85em' }}
+          aria-hidden
+        />
+      )}
     </h4>
   )
 }
