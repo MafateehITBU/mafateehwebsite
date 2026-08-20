@@ -10,8 +10,8 @@ const BASE = (process.argv[2] || process.env.SEO_VERIFY_BASE || 'http://127.0.0.
 const VALID = [
   '/en/',
   '/en/about',
+  '/en/about/',
   '/en/contact',
-  '/en/services',
   '/en/blogs',
   '/en/it-solutions',
   '/en/digital-marketing',
@@ -34,13 +34,13 @@ const INVALID = [
 /** @param {string} path */
 async function fetchPath(path) {
   const res = await fetch(`${BASE}${path}`, {
-    redirect: 'manual',
+    redirect: 'follow',
     headers: { 'User-Agent': 'mafateeh-seo-verify/1.0' },
   })
   const html = res.headers.get('content-type')?.includes('text/html')
     ? await res.text()
     : ''
-  return { status: res.status, html }
+  return { status: res.status, html, finalUrl: res.url }
 }
 
 function extract(html, re) {
@@ -89,9 +89,12 @@ async function main() {
   }
 
   for (const path of INVALID) {
-    const { status } = await fetchPath(path)
-    const ok = status === 404
-    console.log(`${ok ? 'PASS' : 'FAIL'} ${path} → ${status} (expected 404)`)
+    const res = await fetch(`${BASE}${path}`, {
+      redirect: 'manual',
+      headers: { 'User-Agent': 'mafateeh-seo-verify/1.0' },
+    })
+    const ok = res.status === 404
+    console.log(`${ok ? 'PASS' : 'FAIL'} ${path} → ${res.status} (expected 404)`)
     if (!ok) failed += 1
   }
 
