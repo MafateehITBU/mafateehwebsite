@@ -278,6 +278,26 @@ export function injectDocumentMeta(html, meta) {
   return out
 }
 
+/** Build crawler-visible + LCP-friendly static hero markup for home route shells. */
+export function buildStaticHeroShell(locale) {
+  const lang = locale === 'ar' ? 'ar' : 'en'
+  const title = HOME_CONTENT[lang].hero.title
+  const dir = lang === 'ar' ? 'rtl' : 'ltr'
+  const align = lang === 'ar' ? 'margin-inline-start:auto;text-align:right' : 'margin-inline-end:auto;text-align:left'
+  const css = `<style id="static-hero-css">#static-hero{min-height:calc(100dvh - 4.5rem);display:flex;align-items:center;padding:2.5rem 1rem;max-width:1440px;margin:0 auto;box-sizing:border-box}#static-hero h1{margin:0;max-width:36rem;${align};font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(1.875rem,5vw,2.75rem);font-weight:700;line-height:1.2;color:#fff}</style>`
+  const markup = `<div id="static-hero" dir="${dir}" aria-hidden="true"><h1>${escapeHtml(title)}</h1></div>`
+  return { css, markup }
+}
+
+/** @param {string} html @param {'en'|'ar'} locale */
+export function injectStaticHero(html, locale) {
+  if (!html.includes('<div id="root"></div>') && !html.includes('<div id="root">')) return html
+  const { css, markup } = buildStaticHeroShell(locale)
+  let out = html.replace('</head>', `    ${css}\n  </head>`)
+  out = out.replace('<div id="root"></div>', `<div id="root">${markup}</div>`)
+  return out
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')

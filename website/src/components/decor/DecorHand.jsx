@@ -55,8 +55,8 @@ export function DecorHand({ isRtl }) {
         }`}
         width={720}
         height={454}
-        loading="eager"
-        fetchPriority="high"
+        loading="lazy"
+        fetchPriority="low"
         decoding="async"
         draggable={false}
       />

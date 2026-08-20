@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/useLanguage.js'
 import { useLocalizedPath } from '../../hooks/useLocalizedPath.js'
 
 const STORAGE_KEY = 'mafateeh-cookie-consent'
+const MOBILE_MAX_WIDTH = 767
 
 /** @returns {'accepted' | 'rejected' | null} */
 export function readCookieConsent() {
@@ -46,7 +47,32 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    setVisible(readCookieConsent() === null)
+    if (readCookieConsent() !== null) return undefined
+
+    const show = () => setVisible(true)
+    const isMobile = window.innerWidth <= MOBILE_MAX_WIDTH
+    if (!isMobile) {
+      show()
+      return undefined
+    }
+
+    const reveal = () => {
+      const id =
+        window.requestIdleCallback?.(show, { timeout: 3000 }) ?? window.setTimeout(show, 2000)
+      return id
+    }
+
+    if (document.readyState === 'complete') {
+      const id = reveal()
+      return () => {
+        if (typeof id === 'number') window.cancelIdleCallback?.(id)
+        else clearTimeout(id)
+      }
+    }
+
+    const onLoad = () => reveal()
+    window.addEventListener('load', onLoad, { once: true })
+    return () => window.removeEventListener('load', onLoad)
   }, [])
 
   if (!visible) return null

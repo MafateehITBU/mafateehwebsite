@@ -11,6 +11,7 @@ import {
   STATIC_LOGICAL_PATHS,
   buildRouteDocumentMeta,
   injectDocumentMeta,
+  injectStaticHero,
 } from '../src/seo/routeMeta.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -58,13 +59,10 @@ async function loadFontPreloads() {
     .join('\n    ')
 }
 
-/** Home: keep hero image preload. Inner routes: drop it and preload critical fonts only. */
+/** Home: static hero + no competing preloads. Inner routes: drop decor preload; preload fonts. */
 function tunePerfHints(html, isHome, fontPreloads) {
-  let out = html
-  if (!isHome) {
-    out = out.replace(/\s*<link rel="preload" as="image"[^>]*decor-hand[^>]*\/?>\s*/gi, '\n')
-  }
-  if (fontPreloads && !out.includes('montserrat-latin-700')) {
+  let out = html.replace(/\s*<link rel="preload" as="image"[^>]*decor-hand[^>]*\/?>\s*/gi, '\n')
+  if (!isHome && fontPreloads && !out.includes('montserrat-latin-700')) {
     out = out.replace('</head>', `    ${fontPreloads}\n  </head>`)
   }
   return out
@@ -74,6 +72,7 @@ async function writeRouteHtml(baseHtml, locale, logicalPath, blog, fontPreloads)
   const meta = buildRouteDocumentMeta({ locale, logicalPath, blog })
   const isHome = logicalPath === '/'
   let html = injectDocumentMeta(baseHtml, meta)
+  if (isHome) html = injectStaticHero(html, locale)
   html = tunePerfHints(html, isHome, fontPreloads)
   const segments =
     logicalPath === '/'
@@ -105,6 +104,7 @@ async function main() {
 
   const enHomeMeta = buildRouteDocumentMeta({ locale: 'en', logicalPath: '/' })
   let rootHtml = injectDocumentMeta(baseHtml, enHomeMeta)
+  rootHtml = injectStaticHero(rootHtml, 'en')
   rootHtml = tunePerfHints(rootHtml, true, fontPreloads)
   await writeFile(join(DIST, 'index.html'), rootHtml, 'utf8')
 

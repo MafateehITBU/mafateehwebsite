@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLanguage } from '../../../context/useLanguage.js'
 import { getHomeContent } from '../../../content/index.js'
 import { HeroSocialLinks } from './HeroSocialLinks.jsx'
@@ -7,6 +8,11 @@ export function HeroSection() {
   const { locale } = useLanguage()
   const copy = getHomeContent(locale).hero
   const isRtl = locale === 'ar'
+
+  useEffect(() => {
+    document.getElementById('static-hero')?.remove()
+    document.getElementById('static-hero-css')?.remove()
+  }, [])
 
   const containerClass = isRtl
     ? 'flex w-full max-w-xl flex-col gap-6 md:mr-auto md:gap-8 items-stretch text-right'
