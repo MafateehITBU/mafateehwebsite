@@ -1,3 +1,8 @@
+# HISTORICAL / SUPERSEDED EVIDENCE
+# Redirect matrix captured 2026-08-18. Retained for audit.
+# NOT the authoritative current production status.
+# Current verification: closure-evidence/FINAL_PRODUCTION_VERIFICATION.md
+#
 # Host Redirect Matrix — 2026-08-18 09:22 UTC
 
 ================================================================================

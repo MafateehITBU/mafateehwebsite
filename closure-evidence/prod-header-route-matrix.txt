@@ -1,3 +1,8 @@
+# HISTORICAL / SUPERSEDED EVIDENCE
+# Header capture from 18 Aug 2026 (before later nginx/proxy remediation).
+# NOT the authoritative current production status.
+# Current verification: closure-evidence/FINAL_PRODUCTION_VERIFICATION.md
+#
 ====================================================================================================
 https://mafateehgroup.com/
 HTTP/1.1 200 OK

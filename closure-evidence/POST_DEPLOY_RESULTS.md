@@ -1,3 +1,13 @@
+> **HISTORICAL / SUPERSEDED EVIDENCE**
+>
+> This document records production behavior observed **before** the latest remediation (18 Aug 2026) and is retained for audit/history purposes.
+>
+> It is **NOT** the authoritative source for the current production status.
+>
+> `/en/fake-slug` HTTP 200, `/ar` View Source `lang="en"`, and home-only canonical in this file are **historical**. Current production returns HTTP 404 for invalid locale slugs and serves per-route `lang`/`dir`/canonical in raw HTML.
+>
+> **Current production verification:** `closure-evidence/FINAL_PRODUCTION_VERIFICATION.md` and `closure-evidence/SEO_ROUTE_VERIFICATION.md`.
+
 # Post-Deploy Production Test Results — 18 Aug 2026 09:44 UTC
 
 After server deploy (deploy.sh + nginx reload). `git pull` failed (SSH key) but existing server code + reload applied several fixes.

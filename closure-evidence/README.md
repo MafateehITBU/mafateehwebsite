@@ -1,44 +1,53 @@
-# Closure Evidence Package — Mafateeh Website SEO Remediation
+# Closure Evidence Package — Mafateeh Website
 
-**Date:** 2026-08-20 (updated)  
-**Scope:** Evidence mapped to Issue IDs per Final QA / Closure Report
+**Date:** 2026-08-20  
+**Stack:** PERN (PostgreSQL, Express, React, Node) — **not** migrated to Next.js/SSR
 
-## Current production verification (Aug 20)
+## Authoritative current status
+
+| File | Role |
+|------|------|
+| **`FINAL_PRODUCTION_VERIFICATION.md`** | **Current** production verification + status table (use this) |
+| **`SEO_ROUTE_VERIFICATION.md`** | How route HTML shells + nginx 404 were implemented/tested |
+| **`images/`** | Current screenshots (B1 404, G1 canonical/OG, G3 lang/dir, E2 PageSpeed LCP 4.8s) |
+
+Excel register (must match): **VERIFIED 36 | PARTIALLY VERIFIED 1 (MAF-TECH-022) | REJECTED 2 (012, 052) | PENDING EXTERNAL 6 | TOTAL 45**
+
+## Historical / superseded (audit only — not current)
+
+These files correctly described production **before** the 20 Aug route-shell + 404 remediation. They are retained on purpose.
+
+| File | Why superseded |
+|------|----------------|
+| `FINAL_PRODUCTION_VERIFICATION.txt` | 18 Aug; Arabic `lang=en` shell; `/en/fake-slug` 200 |
+| `POST_DEPLOY_RESULTS.md` | 18 Aug; same SPA limitations |
+| `PRODUCTION_TEST_RESULTS.md` | 18 Aug pre/post deploy gap analysis |
+| `http-route-tests.txt` | Invalid locale slugs HTTP 200 |
+| `prod-header-route-matrix.txt` | 18 Aug header capture |
+| `host-redirect-matrix.txt` | 18 Aug redirect capture |
+| `MAFATEEH_Developer_Action_and_Closure_Report.txt` | 17 Aug QA brief |
+| `MAFATEEH_Developer_Final_Corrections.txt` | 18 Aug QA brief |
+
+## Other still-valid technical logs
 
 | File | Issues |
 |------|--------|
-| `SEO_ROUTE_VERIFICATION.md` | **003, 005, 008, 017, 027, 036, 038** — build-time route HTML + nginx 404 |
-| `verify-seo-routes.mjs` | Run after deploy: `npm run verify:seo -- https://www.mafateehgroup.com` |
+| `build-output.txt` | 013, 018, 023, 025 |
+| `fonts-self-hosted.txt` | 047 |
+| `logo-size.txt` | 042 |
+| `blog-url-verification.txt` | 011 |
+| `security-headers-matrix.txt` | 048, 049 |
+| `CURRENT_CURL_AND_PSI_GUIDE.md` | How to re-test with `curl.exe` / PageSpeed |
 
-## Historical tests (Aug 18 — pre route-shell deploy)
+## Pending external (not IT Dev alone)
 
-| File | Notes |
-|------|--------|
-| `FINAL_PRODUCTION_VERIFICATION.txt` | **Historical** — before strict 404 + per-route HTML |
-| `POST_DEPLOY_RESULTS.md` | **Historical** — partial CSR limitations documented |
-| `PRODUCTION_TEST_RESULTS.md` | **Historical** — pre-deploy gap analysis |
+- **004** GSC indexing — Marketing  
+- **020** Cloudflare HIT proof — Dev + Cloudflare  
+- **026** GSC mobile parity — Marketing  
+- **028** official social URLs — Marketing  
+- **031** Legal T&C — Legal  
+- **040** GA4 Realtime — Marketing  
 
-## Files
+## Rejected (do not relabel VERIFIED)
 
-| File | Issues |
-|------|--------|
-| `build-output.txt` | MAF-TECH-013, 018, 023, 025 — Vite chunk sizes |
-| `http-route-tests.txt` | MAF-TECH-005, 008, 035 — production HTTP status codes |
-| `fonts-self-hosted.txt` | MAF-TECH-047 — no Google Fonts on public site |
-| `logo-size.txt` | MAF-TECH-042 — logo under 50 KB |
-
-## Code references (by Issue)
-
-- **001,002,003,006,009,019,021,035,048,049** — `website/nginx.default.conf`, `website/public/`
-- **003,005,008,017,027,036,038** — `website/src/seo/routeMeta.js`, `website/scripts/generate-route-html.mjs`, `website/nginx.default.conf`
-- **027,036,038** — also `website/src/context/SeoProvider.jsx` (client navigation sync)
-- **030,039,040** — `CookieConsent.jsx`, conditional gtag, `ContactForm.jsx`
-- **047** — `@fontsource/montserrat`, `@fontsource/roboto` in `website/src/main.jsx`
-- **043,044** — `backend/src/lib/imageOptimize.ts`, `optimizedImageUrl.js`
-
-## Pending external (not dev-closed)
-
-- **004** — Google Search Console access (Marketing)
-- **020** — Cloudflare dashboard rules + cache HIT (`deploy/cloudflare/CACHE_RULES.md`)
-- **028** — Official social URLs in Admin → Static Info (Marketing)
-- **040** — GA4 Realtime verification (Marketing)
+- **012**, **052** — SSR/stack migration rejected; rejection ≠ “condition eliminated”

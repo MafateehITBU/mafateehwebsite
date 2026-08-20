@@ -1,3 +1,21 @@
+# HISTORICAL / SUPERSEDED EVIDENCE
+#
+# This document records production behavior observed BEFORE the latest
+# remediation (18 Aug 2026) and is retained for audit/history purposes.
+#
+# It is NOT the authoritative source for the current production status.
+#
+# Tests 6–7 (Arabic lang=en in the static shell; /en/fake-slug HTTP 200)
+# are historical SPA observations. Current production uses build-time
+# route HTML shells + strict nginx 404.
+#
+# For current production verification, refer to:
+#   closure-evidence/FINAL_PRODUCTION_VERIFICATION.md
+#   closure-evidence/SEO_ROUTE_VERIFICATION.md
+#
+# Current register (20 Aug 2026): VERIFIED 36 | PARTIALLY VERIFIED 1
+# (MAF-TECH-022) | REJECTED 2 | PENDING EXTERNAL 6 | TOTAL 45.
+#
 # Final Production Verification — 18 Aug 2026 10:03 UTC
 # Verified on server: srv1719442
 # Deploy method: GitHub Actions self-hosted runner

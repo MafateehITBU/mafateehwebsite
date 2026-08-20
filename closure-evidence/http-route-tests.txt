@@ -1,3 +1,9 @@
+# HISTORICAL / SUPERSEDED EVIDENCE
+# Captured 2026-08-18 BEFORE build-time route shells + strict nginx 404.
+# Invalid /en/slug and /ar/slug HTTP 200 in this file are HISTORICAL.
+# Current production: those paths return HTTP 404 (see FINAL_PRODUCTION_VERIFICATION.md).
+# This file is retained for audit; it is NOT current status.
+#
 # HTTP Route Tests — 2026-08-18 09:22 UTC
 
 valid /en/	https://www.mafateehgroup.com/en/	200 https://www.mafateehgroup.com/en/

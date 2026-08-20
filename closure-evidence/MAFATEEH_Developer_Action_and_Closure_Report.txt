@@ -1,3 +1,12 @@
+HISTORICAL / SUPERSEDED EVIDENCE
+This report records the QA closure position as of 17 August 2026, BEFORE the
+latest remediation. It is retained for audit/history. It is NOT the
+authoritative source for the current production status.
+Current verification: closure-evidence/FINAL_PRODUCTION_VERIFICATION.md
+and closure-evidence/SEO_ROUTE_VERIFICATION.md
+Current Excel register (20 Aug 2026): VERIFIED 36 | PARTIALLY VERIFIED 1
+(MAF-TECH-022) | REJECTED 2 (012, 052) | PENDING EXTERNAL 6 | TOTAL 45.
+
 FINAL QA / CLOSURE CONTROL
 MAFATEEH — Developer Action & Closure Report
 Evidence-based actions required before final acceptance

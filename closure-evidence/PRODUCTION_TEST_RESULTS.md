@@ -1,3 +1,15 @@
+> **HISTORICAL / SUPERSEDED EVIDENCE**
+>
+> This document records production behavior observed **before** the latest remediation (18 Aug 2026) and is retained for audit/history purposes.
+>
+> It is **NOT** the authoritative source for the current production status.
+>
+> Statements such as JS-only canonical, `/en/fake-slug` HTTP 200, Arabic raw HTML `lang="en"`, partial OG/structured data, and older LCP figures were true **at the time of this test** and have since been superseded for issues 003, 005, 008, 017, 027, 036, and 038.
+>
+> **Current production verification:** `closure-evidence/FINAL_PRODUCTION_VERIFICATION.md` and `closure-evidence/SEO_ROUTE_VERIFICATION.md`.
+>
+> **Current Excel status (20 Aug 2026):** VERIFIED 36 | PARTIALLY VERIFIED 1 (MAF-TECH-022 LCP) | REJECTED 2 (012, 052) | PENDING EXTERNAL 6 | TOTAL 45.
+
 # Production Test Results — 18 Aug 2026
 
 **Site tested:** https://www.mafateehgroup.com  

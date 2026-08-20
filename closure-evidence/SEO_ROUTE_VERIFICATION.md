@@ -1,6 +1,8 @@
 # SEO Route Verification — Build-Time HTML Shells (PERN stack preserved)
 
 **Date:** 20 August 2026  
+**Role:** Current method + acceptance checks. Status table lives in `FINAL_PRODUCTION_VERIFICATION.md` (authoritative).
+
 **Approach:** Post-build Node script generates per-route `index.html` under `dist/{locale}/{path}/`.  
 nginx serves only pre-generated shells; invalid locale paths return **HTTP 404** (no SPA fallback).
 
@@ -48,24 +50,22 @@ curl -s -o /dev/null -w "%{http_code}\n" https://www.mafateehgroup.com/en/fake-s
 curl -s -o /dev/null -w "%{http_code}\n" https://www.mafateehgroup.com/ar/random-test-page
 ```
 
-## Issues addressed
+## Issues addressed (current status)
 
-| Issue | Fix |
-|-------|-----|
-| MAF-TECH-003 | Per-route canonical in initial HTML |
-| MAF-TECH-005/008 | nginx 404 for unknown locale paths |
-| MAF-TECH-017 | Per-route OG/Twitter in initial HTML |
-| MAF-TECH-027 | Organization + WebSite + Breadcrumb + BlogPosting JSON-LD in HTML |
-| MAF-TECH-036/038 | `lang` + `dir` in initial HTML per locale |
-| MAF-TECH-022 | Font subset, mobile ParticleField removed, existing LCP preload retained |
+| Issue | Current status | Production proof |
+|-------|----------------|------------------|
+| MAF-TECH-003 | FULLY VERIFIED | canonical in raw `/en/about/` and `/ar/about/` (G1) |
+| MAF-TECH-005/008 | FULLY VERIFIED | `/en/fake-slug` and `/ar/random-test-page` HTTP **404** (B1) |
+| MAF-TECH-017 | FULLY VERIFIED | og/twitter in raw HTML (G1) |
+| MAF-TECH-027 | FULLY VERIFIED | JSON-LD in raw HTML (G2) |
+| MAF-TECH-036/038 | FULLY VERIFIED | `lang="ar" dir="rtl"` / `lang="en" dir="ltr"` (G3) |
+| MAF-TECH-022 | **PARTIALLY VERIFIED** | PageSpeed Mobile 20 Aug: LCP **~4.8s** (target ≤2.5s). E2-1.png |
 
 ## Historical vs current
 
-- **Historical (Aug 18):** SPA fallback returned HTTP 200 for invalid slugs; metadata client-only.
-- **Current (Aug 20):** Build-time HTML shells + strict nginx routing.
+- **Historical (Aug 18 — SUPERSEDED files):** SPA fallback HTTP 200 for invalid slugs; metadata often client-only; Arabic shell `lang="en"`.
+- **Current (Aug 20):** Build-time HTML shells + strict nginx routing. See `FINAL_PRODUCTION_VERIFICATION.md`.
 
 ## Lighthouse mobile (MAF-TECH-022)
 
-Re-run PageSpeed Insights on `/en/` after deploy. Record FCP, LCP, CLS, INP, TBT in `mobile.json`.
-
-**Target:** LCP ≤ 2.5s — verify on production; do not mark FULLY VERIFIED until measured post-deploy.
+**Do not mark FULLY VERIFIED.** Latest production lab (20 Aug 2026): Performance **75**, LCP **~4.8 seconds**. Target remains LCP ≤ 2.5s.

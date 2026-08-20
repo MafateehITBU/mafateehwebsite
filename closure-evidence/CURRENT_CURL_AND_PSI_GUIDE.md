@@ -1,5 +1,9 @@
 # CURRENT PRODUCTION VERIFICATION — 20 Aug 2026
 
+Authoritative status table: `FINAL_PRODUCTION_VERIFICATION.md`.
+
+**MAF-TECH-022 remains PARTIALLY VERIFIED.** Latest PageSpeed Mobile (20 Aug 2026): Performance 75, **LCP ~4.8s** (target ≤2.5s). Older lab figures (~77 / LCP 3.9s) in this file are historical.
+
 ## Why your SEO curl looked empty
 
 `/en/about` (no trailing slash) returned **301** to `http://.../en/about/`.
@@ -47,7 +51,9 @@ Screenshots for Word report:
 
 ## PageSpeed / LCP
 
-Historical lab (pre-redirect-fix): Performance ~77, **LCP 3.9s** (target ≤2.5s).
+**Current (20 Aug 2026, Attachment E2):** Performance **75**, **LCP ~4.8s** — still PARTIAL.
+
+Historical lab (pre-redirect-fix, SUPERSEDED): Performance ~77, LCP 3.9s (target ≤2.5s).
 
 HTTP trailing-slash redirect was leaking `Location: http://...` which hurts SEO and lab LCP.
 Fix is in nginx (`absolute_redirect off` + try_files order + reverse-proxy `proxy_redirect`).

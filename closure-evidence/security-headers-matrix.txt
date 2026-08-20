@@ -1,4 +1,7 @@
 # Security & Cache Header Matrix — 2026-08-18 09:22 UTC
+# Supporting evidence for HSTS/security/cache headers. Not a current SEO status report.
+# Current issue statuses: closure-evidence/FINAL_PRODUCTION_VERIFICATION.md
+
 
 ================================================================================
 https://www.mafateehgroup.com/en/
