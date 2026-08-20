@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
+
 /** Served from /public so LCP image can be preloaded with a stable URL. */
 const HAND_SRC = '/decor-hand.webp'
 const HAND_SRC_SM = '/decor-hand-sm.webp'
+const MOBILE_MAX_WIDTH = 767
 
 /** Optical offset below flex center (PNG has extra space above the hand) */
 const VERTICAL_OFFSET =
@@ -8,9 +11,33 @@ const VERTICAL_OFFSET =
 
 /**
  * Decorative hand — fixed in the viewport; stays put while scrolling.
- * Solid sections (section-solid) cover it when they pass over.
+ * On mobile, defer until after load so hero text can become LCP first.
  */
 export function DecorHand({ isRtl }) {
+  const [show, setShow] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return window.innerWidth > MOBILE_MAX_WIDTH
+  })
+
+  useEffect(() => {
+    if (window.innerWidth > MOBILE_MAX_WIDTH) {
+      setShow(true)
+      return undefined
+    }
+    const reveal = () => setShow(true)
+    if (document.readyState === 'complete') {
+      const id = window.requestIdleCallback?.(reveal, { timeout: 2500 }) ?? setTimeout(reveal, 1200)
+      return () => {
+        if (typeof id === 'number') window.cancelIdleCallback?.(id)
+        else clearTimeout(id)
+      }
+    }
+    window.addEventListener('load', reveal, { once: true })
+    return () => window.removeEventListener('load', reveal)
+  }, [])
+
+  if (!show) return null
+
   return (
     <div
       className={`pointer-events-none fixed inset-y-0 z-[3] flex items-center ${

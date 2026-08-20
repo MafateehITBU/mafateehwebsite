@@ -3,7 +3,7 @@
  * Post-build: generate per-route index.html shells with crawler-visible SEO metadata.
  * Keeps React SPA + nginx; no SSR framework migration.
  */
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -38,9 +38,43 @@ async function fetchPublishedBlogs() {
   }
 }
 
-async function writeRouteHtml(baseHtml, locale, logicalPath, blog) {
+async function loadFontPreloads() {
+  const assetsDir = join(DIST, 'assets')
+  let files = []
+  try {
+    files = await readdir(assetsDir)
+  } catch {
+    return ''
+  }
+  const mont700 = files.find((f) => /montserrat-latin-700.*\.woff2$/i.test(f))
+  const roboto400 = files.find((f) => /roboto-latin-400.*\.woff2$/i.test(f))
+  return [
+    mont700 &&
+      `<link rel="preload" href="/assets/${mont700}" as="font" type="font/woff2" crossorigin />`,
+    roboto400 &&
+      `<link rel="preload" href="/assets/${roboto400}" as="font" type="font/woff2" crossorigin />`,
+  ]
+    .filter(Boolean)
+    .join('\n    ')
+}
+
+/** Home: keep hero image preload. Inner routes: drop it and preload critical fonts only. */
+function tunePerfHints(html, isHome, fontPreloads) {
+  let out = html
+  if (!isHome) {
+    out = out.replace(/\s*<link rel="preload" as="image"[^>]*decor-hand[^>]*\/?>\s*/gi, '\n')
+  }
+  if (fontPreloads && !out.includes('montserrat-latin-700')) {
+    out = out.replace('</head>', `    ${fontPreloads}\n  </head>`)
+  }
+  return out
+}
+
+async function writeRouteHtml(baseHtml, locale, logicalPath, blog, fontPreloads) {
   const meta = buildRouteDocumentMeta({ locale, logicalPath, blog })
-  const html = injectDocumentMeta(baseHtml, meta)
+  const isHome = logicalPath === '/'
+  let html = injectDocumentMeta(baseHtml, meta)
+  html = tunePerfHints(html, isHome, fontPreloads)
   const segments =
     logicalPath === '/'
       ? [locale]
@@ -53,24 +87,26 @@ async function writeRouteHtml(baseHtml, locale, logicalPath, blog) {
 
 async function main() {
   const baseHtml = await readFile(join(DIST, 'index.html'), 'utf8')
+  const fontPreloads = await loadFontPreloads()
   const blogs = await fetchPublishedBlogs()
   const written = []
 
   for (const locale of LOCALES) {
     for (const logicalPath of STATIC_LOGICAL_PATHS) {
-      const url = await writeRouteHtml(baseHtml, locale, logicalPath, undefined)
+      const url = await writeRouteHtml(baseHtml, locale, logicalPath, undefined, fontPreloads)
       written.push(url)
     }
     for (const blog of blogs) {
       const logicalPath = `/blogs/${blog.slug}`
-      const url = await writeRouteHtml(baseHtml, locale, logicalPath, blog)
+      const url = await writeRouteHtml(baseHtml, locale, logicalPath, blog, fontPreloads)
       written.push(url)
     }
   }
 
-  // Root index.html = English home (legacy/direct access)
   const enHomeMeta = buildRouteDocumentMeta({ locale: 'en', logicalPath: '/' })
-  await writeFile(join(DIST, 'index.html'), injectDocumentMeta(baseHtml, enHomeMeta), 'utf8')
+  let rootHtml = injectDocumentMeta(baseHtml, enHomeMeta)
+  rootHtml = tunePerfHints(rootHtml, true, fontPreloads)
+  await writeFile(join(DIST, 'index.html'), rootHtml, 'utf8')
 
   await writeFile(
     join(DIST, 'valid-routes.json'),
