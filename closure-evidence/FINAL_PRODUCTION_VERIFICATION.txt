@@ -1,0 +1,49 @@
+# Final Production Verification — 18 Aug 2026 10:03 UTC
+# Verified on server: srv1719442
+# Deploy method: GitHub Actions self-hosted runner
+
+## Test 1 — Apex redirect (MAF-TECH-006)
+curl -I https://mafateehgroup.com/
+→ HTTP/2 301
+→ location: https://www.mafateehgroup.com/
+→ RESULT: PASS
+
+## Test 2 — HSTS on normal page (MAF-TECH-048)
+curl -I https://www.mafateehgroup.com/en/ | grep -i strict
+→ strict-transport-security: max-age=31536000; includeSubDomains; preload
+→ RESULT: PASS
+
+## Test 3 — Security headers on apex redirect (MAF-TECH-049)
+Included on 301 response:
+→ strict-transport-security, x-content-type-options, x-frame-options
+→ referrer-policy, permissions-policy
+→ RESULT: PASS
+
+## Test 4 — Invalid root URL (MAF-TECH-005, 008)
+curl invalid-page-xyz
+→ 404
+→ RESULT: PASS
+
+## Test 5 — Image cache 30 days (MAF-TECH-019)
+curl -I https://www.mafateehgroup.com/logo-mafateeh.webp
+→ Cache-Control: public, max-age=2592000
+→ RESULT: PASS
+
+## Test 6 — Arabic raw HTML (MAF-TECH-036)
+curl -s https://www.mafateehgroup.com/ar/ | head -5
+→ <html lang="en"> (static shell)
+→ hreflang="ar" link present in full HTML
+→ Runtime: React + inline script set lang=ar, dir=rtl after load
+→ RESULT: PARTIAL (SPA limitation for View Source; hreflang present)
+
+## Test 7 — SPA invalid slug (MAF-TECH-005/008)
+/en/fake-slug-xyz → 200 + client NotFound page
+→ RESULT: PARTIAL (expected React SPA behaviour)
+
+## Test 8 — Blog URLs (MAF-TECH-011)
+All 3 published posts EN+AR → 200
+→ RESULT: PASS (see blog-url-verification.txt)
+
+## Test 9 — Initial JS bundle (MAF-TECH-018, 025)
+~128 KB gzip initial route JS (< 500 KB target)
+→ RESULT: PASS (see initial-js-summary.txt)
