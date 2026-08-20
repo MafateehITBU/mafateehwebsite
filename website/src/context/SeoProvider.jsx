@@ -113,27 +113,7 @@ function upsertJsonLd(id, data) {
   el.textContent = JSON.stringify(data)
 }
 
-const KNOWN_PATHS = new Set([
-  '/',
-  '/about',
-  '/it-solutions',
-  '/digital-marketing',
-  '/branding',
-  '/packages',
-  '/blogs',
-  '/contact',
-  '/privacy-policy',
-  '/terms-and-conditions',
-  '/cookie-policy',
-  '/accessibility',
-])
-
-/** @param {string} pathname */
-function isKnownPath(pathname) {
-  if (KNOWN_PATHS.has(pathname)) return true
-  if (pathname.startsWith('/blogs/') && pathname.length > '/blogs/'.length) return true
-  return false
-}
+import { isKnownLogicalPath } from '../seo/routeMeta.js'
 
 /** @param {string} pathname */
 function pageLabelFromPath(pathname) {
@@ -158,7 +138,8 @@ function pageLabelFromPath(pathname) {
 
 /**
  * Route-aware SEO: canonical, OG/Twitter, JSON-LD, gtag + dashboard SEO fields.
- * Note: tags injected client-side; full crawler visibility still needs SSR/prerender (MAF-TECH-012).
+ * Initial HTML metadata is injected at build time (see scripts/generate-route-html.mjs).
+ * This provider keeps metadata in sync after client-side navigation.
  */
 export function SeoProvider({ children }) {
   const location = useLocation()
@@ -215,7 +196,7 @@ export function SeoProvider({ children }) {
     const ogImageUrl =
       String(seo?.ogImageUrl ?? '').trim() || `${SITE_ORIGIN}/logo-mafateeh.png`
 
-    const known = isKnownPath(logicalPath)
+    const known = isKnownLogicalPath(logicalPath)
     document.title = known
       ? metaTitle
       : `Page Not Found | Mafateeh Group`

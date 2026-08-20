@@ -7,6 +7,7 @@
     <link rel="apple-touch-icon" href="/logo-mafateeh.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
     <link rel="preload" as="image" href="/decor-hand-sm.webp" type="image/webp" fetchpriority="high" imagesrcset="/decor-hand-sm.webp 320w, /decor-hand.webp 720w" imagesizes="(max-width: 640px) min(78vw, 320px), min(68vw, 720px)" />
     <title>Mafateeh Group</title>
     <meta name="description" content="Mafateeh Group — IT, digital marketing, and branding solutions." />
@@ -20,7 +21,11 @@
     <meta property="og:description" content="Mafateeh Group — IT, digital marketing, and branding solutions." />
     <meta property="og:url" content="https://www.mafateehgroup.com/en/" />
     <meta property="og:image" content="https://www.mafateehgroup.com/logo-mafateeh.png" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mafateeh Group" />
+    <meta name="twitter:description" content="Mafateeh Group — IT, digital marketing, and branding solutions." />
+    <meta name="twitter:image" content="https://www.mafateehgroup.com/logo-mafateeh.png" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -47,19 +52,6 @@
       try {
         if (localStorage.getItem('mafateeh-theme') === 'dark') {
           document.documentElement.classList.add('dark')
-        }
-        var path = location.pathname || ''
-        var localeFromPath = /^\/ar(\/|$)/.test(path) ? 'ar' : /^\/en(\/|$)/.test(path) ? 'en' : null
-        var locale = localeFromPath || localStorage.getItem('mafateeh-locale')
-        if (locale === 'ar' || locale === 'en') {
-          document.documentElement.lang = locale
-          document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr'
-          if (localeFromPath === 'ar') {
-            var canonical = document.querySelector('link[rel="canonical"]')
-            if (canonical) canonical.href = 'https://www.mafateehgroup.com/ar/'
-            var ogUrl = document.querySelector('meta[property="og:url"]')
-            if (ogUrl) ogUrl.content = 'https://www.mafateehgroup.com/ar/'
-          }
         }
       } catch (_) {}
     </script>

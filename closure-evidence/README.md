@@ -1,7 +1,22 @@
 # Closure Evidence Package — Mafateeh Website SEO Remediation
 
-**Date:** 2026-08-18  
+**Date:** 2026-08-20 (updated)  
 **Scope:** Evidence mapped to Issue IDs per Final QA / Closure Report
+
+## Current production verification (Aug 20)
+
+| File | Issues |
+|------|--------|
+| `SEO_ROUTE_VERIFICATION.md` | **003, 005, 008, 017, 027, 036, 038** — build-time route HTML + nginx 404 |
+| `verify-seo-routes.mjs` | Run after deploy: `npm run verify:seo -- https://www.mafateehgroup.com` |
+
+## Historical tests (Aug 18 — pre route-shell deploy)
+
+| File | Notes |
+|------|--------|
+| `FINAL_PRODUCTION_VERIFICATION.txt` | **Historical** — before strict 404 + per-route HTML |
+| `POST_DEPLOY_RESULTS.md` | **Historical** — partial CSR limitations documented |
+| `PRODUCTION_TEST_RESULTS.md` | **Historical** — pre-deploy gap analysis |
 
 ## Files
 
@@ -15,7 +30,8 @@
 ## Code references (by Issue)
 
 - **001,002,003,006,009,019,021,035,048,049** — `website/nginx.default.conf`, `website/public/`
-- **027,036,038** — `website/index.html`, `website/src/context/SeoProvider.jsx`, locale routing
+- **003,005,008,017,027,036,038** — `website/src/seo/routeMeta.js`, `website/scripts/generate-route-html.mjs`, `website/nginx.default.conf`
+- **027,036,038** — also `website/src/context/SeoProvider.jsx` (client navigation sync)
 - **030,039,040** — `CookieConsent.jsx`, conditional gtag, `ContactForm.jsx`
 - **047** — `@fontsource/montserrat`, `@fontsource/roboto` in `website/src/main.jsx`
 - **043,044** — `backend/src/lib/imageOptimize.ts`, `optimizedImageUrl.js`

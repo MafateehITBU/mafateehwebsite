@@ -129,4 +129,34 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url>
+    <loc>https://www.mafateehgroup.com/en/blogs/the-biggest-threat-to-any-business-isn-t-competition-it-s-the-chaos-you-can-t-see</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mafateehgroup.com/ar/blogs/the-biggest-threat-to-any-business-isn-t-competition-it-s-the-chaos-you-can-t-see</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mafateehgroup.com/en/blogs/most-lost-sales-start-with-a-poor-digital-experience</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mafateehgroup.com/ar/blogs/most-lost-sales-start-with-a-poor-digital-experience</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mafateehgroup.com/en/blogs/is-your-marketing-a-revenue-engine-or-just-noise</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mafateehgroup.com/ar/blogs/is-your-marketing-a-revenue-engine-or-just-noise</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
