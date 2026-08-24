@@ -59,35 +59,17 @@ async function loadFontPreloads() {
     .join('\n    ')
 }
 
-/** All routes: drop decor-hand preload; inject critical font preloads ASAP; defer CSS on mobile. */
+/** All routes: drop decor-hand preload; inject critical font preloads ASAP. */
 function tunePerfHints(html, fontPreloads) {
   let out = html.replace(/\s*<link rel="preload" as="image"[^>]*decor-hand[^>]*\/?>\s*/gi, '\n')
-
-  // Font preloads before stylesheet for fastest FCP/LCP
+  // Font preloads must come before any stylesheet for fastest FCP/LCP
   if (fontPreloads && !out.includes('montserrat-latin-700')) {
+    // Insert right after <meta charset> so they land as early as possible
     out = out.replace(
       /(<meta charset="UTF-8"\s*\/>)/i,
       `$1\n    ${fontPreloads}`,
     )
   }
-
-  // Defer main CSS on mobile: media=print means non-render-blocking download;
-  // onload switches to media=all so styles apply as soon as they arrive.
-  // Desktop sees media="(min-width:768px)" which also doesn't block, but Vite
-  // inlines a <link rel=stylesheet> with media=all — we replace it here.
-  // Defer main CSS: media=print is non-render-blocking; onload switches to all.
-  // The noscript fallback keeps styles for no-JS crawlers.
-  out = out.replace(
-    /(<link\s[^>]*href="\/assets\/index-[^"]*\.css"[^>]*>)/gi,
-    (match) => {
-      const deferred = match
-        .replace(/\s*media="[^"]*"/, '')           // strip any existing media attr
-        .replace(/rel="stylesheet"/, 'rel="stylesheet" media="print"')
-        .replace(/>$/, ' onload="this.media=\'all\'">')
-      return `${deferred}\n    <noscript>${match}</noscript>`
-    },
-  )
-
   return out
 }
 
