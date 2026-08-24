@@ -10,8 +10,13 @@ export function HeroSection() {
   const isRtl = locale === 'ar'
 
   useEffect(() => {
-    document.getElementById('static-hero')?.remove()
-    document.getElementById('static-hero-css')?.remove()
+    // On desktop (≥768px): remove static hero shell so the React version takes over.
+    // On mobile: static hero stays — it IS the LCP element and never gets replaced.
+    const mq = window.matchMedia('(min-width:768px)')
+    if (mq.matches) {
+      document.getElementById('static-hero')?.remove()
+      document.getElementById('static-hero-css')?.remove()
+    }
   }, [])
 
   const containerClass = isRtl
@@ -21,8 +26,10 @@ export function HeroSection() {
         'items-center text-center md:items-start md:text-left',
       ].join(' ')
 
+  // React hero is hidden on mobile — the static HTML hero handles LCP there.
+  // On desktop it renders normally and replaces the static shell.
   return (
-    <section data-aos={isRtl? "fade-right" : "fade-left"} className="relative flex min-h-[calc(100dvh-4.5rem)] w-full items-center py-10 sm:min-h-[calc(100dvh-5rem)] sm:py-14">
+    <section data-aos={isRtl? "fade-right" : "fade-left"} className="relative hidden min-h-[calc(100dvh-4.5rem)] w-full items-center py-10 md:flex sm:min-h-[calc(100dvh-5rem)] sm:py-14">
       <div dir={isRtl ? 'rtl' : 'ltr'} className={containerClass}>
         <h1 className="w-full font-heading text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
           {copy.title}

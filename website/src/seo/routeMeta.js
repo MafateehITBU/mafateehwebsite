@@ -278,14 +278,45 @@ export function injectDocumentMeta(html, meta) {
   return out
 }
 
-/** Build crawler-visible + LCP-friendly static hero markup for home route shells. */
+/** Build crawler-visible + LCP-friendly static hero markup for home route shells.
+ *  On mobile: stays visible and scores LCP. React HeroSection is hidden on mobile
+ *  so it never triggers a later, larger LCP paint.
+ *  On desktop: removed once React hydrates (handled in HeroSection useEffect).
+ */
 export function buildStaticHeroShell(locale) {
   const lang = locale === 'ar' ? 'ar' : 'en'
   const title = HOME_CONTENT[lang].hero.title
+  const subtitle = HOME_CONTENT[lang].hero.subtitle
+  const getQuotes = HOME_CONTENT[lang].hero.getQuotes
+  const getStarted = HOME_CONTENT[lang].hero.getStarted
   const dir = lang === 'ar' ? 'rtl' : 'ltr'
-  const align = lang === 'ar' ? 'margin-inline-start:auto;text-align:right' : 'margin-inline-end:auto;text-align:left'
-  const css = `<style id="static-hero-css">#static-hero{min-height:calc(100dvh - 4.5rem);display:flex;align-items:center;padding:2.5rem 1rem;max-width:1440px;margin:0 auto;box-sizing:border-box}#static-hero h1{margin:0;max-width:36rem;${align};font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(1.875rem,5vw,2.75rem);font-weight:700;line-height:1.2;color:#fff}</style>`
-  const markup = `<div id="static-hero" dir="${dir}" aria-hidden="true"><h1>${escapeHtml(title)}</h1></div>`
+  const textAlign = lang === 'ar' ? 'right' : 'left'
+
+  // Critical CSS: visible on all widths before React+Tailwind load.
+  // On desktop (≥768px) we hide it so the real React hero replaces it cleanly.
+  const css = `<style id="static-hero-css">
+#static-hero{min-height:calc(100dvh - 4.5rem);display:flex;align-items:center;padding:2.5rem 1rem;max-width:1440px;margin-inline:auto;box-sizing:border-box}
+#static-hero .sh-inner{display:flex;flex-direction:column;gap:1.25rem;max-width:36rem;${lang==='ar'?'margin-inline-start:auto':'margin-inline-end:auto'};text-align:${textAlign}}
+#static-hero h1{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:clamp(1.875rem,5vw,2.75rem);font-weight:700;line-height:1.2;color:#fff}
+#static-hero .sh-sub{margin:0;font-family:system-ui,-apple-system,sans-serif;font-size:1rem;line-height:1.6;color:rgba(255,255,255,0.85)}
+#static-hero .sh-btns{display:flex;flex-direction:column;gap:.75rem}
+#static-hero .sh-btn{display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1.5rem;border-radius:.5rem;border:2px solid #fff;font-size:1rem;font-weight:600;color:#fff;text-decoration:none;font-family:system-ui,-apple-system,sans-serif}
+#static-hero .sh-btn-primary{background:#dfb026}
+#static-hero .sh-btn-secondary{background:#00502e}
+@media(min-width:768px){#static-hero{display:none}}
+</style>`
+
+  const markup = `<div id="static-hero" dir="${dir}">
+  <div class="sh-inner">
+    <h1>${escapeHtml(title)}</h1>
+    <p class="sh-sub">${escapeHtml(subtitle)}</p>
+    <div class="sh-btns">
+      <a href="/contact" class="sh-btn sh-btn-primary">${escapeHtml(getQuotes)}</a>
+      <a href="/contact" class="sh-btn sh-btn-secondary">${escapeHtml(getStarted)}</a>
+    </div>
+  </div>
+</div>`
+
   return { css, markup }
 }
 
