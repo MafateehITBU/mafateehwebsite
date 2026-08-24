@@ -59,11 +59,16 @@ async function loadFontPreloads() {
     .join('\n    ')
 }
 
-/** Home: static hero + no competing preloads. Inner routes: drop decor preload; preload fonts. */
-function tunePerfHints(html, isHome, fontPreloads) {
+/** All routes: drop decor-hand preload; inject critical font preloads ASAP. */
+function tunePerfHints(html, fontPreloads) {
   let out = html.replace(/\s*<link rel="preload" as="image"[^>]*decor-hand[^>]*\/?>\s*/gi, '\n')
-  if (!isHome && fontPreloads && !out.includes('montserrat-latin-700')) {
-    out = out.replace('</head>', `    ${fontPreloads}\n  </head>`)
+  // Font preloads must come before any stylesheet for fastest FCP/LCP
+  if (fontPreloads && !out.includes('montserrat-latin-700')) {
+    // Insert right after <meta charset> so they land as early as possible
+    out = out.replace(
+      /(<meta charset="UTF-8"\s*\/>)/i,
+      `$1\n    ${fontPreloads}`,
+    )
   }
   return out
 }
@@ -73,7 +78,7 @@ async function writeRouteHtml(baseHtml, locale, logicalPath, blog, fontPreloads)
   const isHome = logicalPath === '/'
   let html = injectDocumentMeta(baseHtml, meta)
   if (isHome) html = injectStaticHero(html, locale)
-  html = tunePerfHints(html, isHome, fontPreloads)
+  html = tunePerfHints(html, fontPreloads)
   const segments =
     logicalPath === '/'
       ? [locale]
@@ -105,7 +110,7 @@ async function main() {
   const enHomeMeta = buildRouteDocumentMeta({ locale: 'en', logicalPath: '/' })
   let rootHtml = injectDocumentMeta(baseHtml, enHomeMeta)
   rootHtml = injectStaticHero(rootHtml, 'en')
-  rootHtml = tunePerfHints(rootHtml, true, fontPreloads)
+  rootHtml = tunePerfHints(rootHtml, fontPreloads)
   await writeFile(join(DIST, 'index.html'), rootHtml, 'utf8')
 
   await writeFile(
