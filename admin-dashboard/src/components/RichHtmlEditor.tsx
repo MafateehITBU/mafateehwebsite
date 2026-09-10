@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import {
   BoldOutlined,
   ItalicOutlined,
@@ -71,6 +71,63 @@ function normalizeHref(raw: string): string {
 
 function isExternalHref(href: string): boolean {
   return /^(https?:\/\/|\/|#)/i.test(href);
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Match http(s), www., or bare domains; trailing .,;:!? are not part of the URL. */
+const URL_IN_TEXT_RE =
+  /\b((?:https?:\/\/|www\.)[^\s<>"'()]+|(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s<>"'()]*)?)/gi;
+
+function trimTrailingPunctuation(raw: string): { url: string; trail: string } {
+  const match = raw.match(/^(.*?)([.,;:!?)]*)$/);
+  if (!match) return { url: raw, trail: "" };
+  return { url: match[1], trail: match[2] };
+}
+
+function buildAnchorHtml(rawUrl: string): string | null {
+  const { url: trimmed, trail } = trimTrailingPunctuation(rawUrl.trim());
+  if (!trimmed) return null;
+  const href = normalizeHref(trimmed);
+  if (!isSafeHref(href)) return null;
+  const label = escapeHtml(trimmed);
+  const safeHref = escapeHtml(href);
+  const anchor = isExternalHref(href)
+    ? `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    : `<a href="${safeHref}">${label}</a>`;
+  return trail ? `${anchor}${escapeHtml(trail)}` : anchor;
+}
+
+/** Turn plain text into HTML, auto-wrapping detected URLs as anchors. */
+function linkifyPlainText(text: string): string {
+  const parts: string[] = [];
+  let last = 0;
+  const re = new RegExp(URL_IN_TEXT_RE.source, "gi");
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > last) {
+      parts.push(escapeHtml(text.slice(last, match.index)).replace(/\n/g, "<br>"));
+    }
+    const linked = buildAnchorHtml(match[1]);
+    parts.push(linked ?? escapeHtml(match[1]));
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) {
+    parts.push(escapeHtml(text.slice(last)).replace(/\n/g, "<br>"));
+  }
+  return parts.join("") || escapeHtml(text).replace(/\n/g, "<br>");
+}
+
+function looksLikeUrlToken(token: string): boolean {
+  const { url } = trimTrailingPunctuation(token.trim());
+  if (!url) return false;
+  return isSafeHref(normalizeHref(url));
 }
 
 /** Unwrap browser-generated spans (styles) that are not brand color spans; keep safe anchors. */
@@ -335,6 +392,103 @@ export function RichHtmlEditor({
     emitChange();
   };
 
+  /** Paste: auto-convert URLs in plain text into clickable links. */
+  const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
+    const clipboard = event.clipboardData;
+    if (!clipboard) return;
+
+    const html = clipboard.getData("text/html");
+    const plain = clipboard.getData("text/plain");
+
+    // Prefer plain text when it contains URLs so we control link markup.
+    if (plain && /(https?:\/\/|www\.|\b[\w-]+\.[a-z]{2,}\b)/i.test(plain)) {
+      event.preventDefault();
+      document.execCommand("insertHTML", false, linkifyPlainText(plain));
+      emitChange();
+      return;
+    }
+
+    // HTML paste that already includes anchors — insert cleaned HTML.
+    if (html && /<a\b/i.test(html)) {
+      event.preventDefault();
+      const cleaned = normalizeEditorHtml(html);
+      document.execCommand("insertHTML", false, cleaned || linkifyPlainText(plain || ""));
+      emitChange();
+    }
+  };
+
+  /**
+   * After Space / Enter, if the word before the caret looks like a URL
+   * and is not already inside an <a>, wrap it as a link.
+   */
+  const autoLinkPreviousWord = () => {
+    const el = editorRef.current;
+    if (!el) return;
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return;
+    if (findAnchorInSelection()) return;
+
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType !== Node.TEXT_NODE) return;
+    const text = node.textContent ?? "";
+    const caret = range.startOffset;
+    if (caret < 1) return;
+
+    // Skip the just-typed delimiter (space / newline) when finding the word.
+    let end = caret;
+    const justTyped = text[caret - 1];
+    if (justTyped === " " || justTyped === "\n" || justTyped === "\u00a0") {
+      end = caret - 1;
+    }
+    if (end <= 0) return;
+
+    let start = end;
+    while (start > 0 && !/\s/.test(text[start - 1]!)) {
+      start -= 1;
+    }
+    const token = text.slice(start, end);
+    if (!looksLikeUrlToken(token)) return;
+
+    const { url, trail } = trimTrailingPunctuation(token);
+    const href = normalizeHref(url);
+    if (!isSafeHref(href)) return;
+
+    const wordRange = document.createRange();
+    wordRange.setStart(node, start);
+    wordRange.setEnd(node, end - trail.length);
+
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    if (isExternalHref(href)) {
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+    }
+    anchor.textContent = url;
+
+    wordRange.deleteContents();
+    wordRange.insertNode(anchor);
+
+    // Keep caret after the link (+ trailing punct / space still in the text node).
+    const after = document.createRange();
+    after.setStart(anchor.nextSibling ?? anchor.parentNode!, 0);
+    if (anchor.nextSibling && anchor.nextSibling.nodeType === Node.TEXT_NODE) {
+      after.setStart(anchor.nextSibling, 0);
+    } else {
+      after.setStartAfter(anchor);
+    }
+    after.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(after);
+    emitChange();
+  };
+
+  const handleKeyUp = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === " " || event.key === "Enter") {
+      autoLinkPreviousWord();
+    }
+  };
+
   const isEmpty = !value || value === "<br>" || !stripTags(value).trim();
   const surfaceMaxHeight = Math.max(minHeight, 320);
 
@@ -477,13 +631,15 @@ export function RichHtmlEditor({
         suppressContentEditableWarning
         onInput={emitChange}
         onBlur={emitChange}
+        onPaste={handlePaste}
+        onKeyUp={handleKeyUp}
       />
 
       {isEmpty ? (
         <Typography.Text type="secondary" style={{ display: "block", marginTop: 6, fontSize: 12 }}>
           {extended
-            ? "Headings, bold/italic/underline, links, brand colors, and horizontal lines are supported."
-            : "Use H1–H6 for headings, P for normal text, and the icons for bold, italic, underline, and links."}
+            ? "Headings, bold/italic/underline, links (paste or type a URL), brand colors, and horizontal lines are supported."
+            : "Paste or type a URL to auto-link. Use the toolbar for headings, bold, italic, underline, and manual links."}
         </Typography.Text>
       ) : null}
 
