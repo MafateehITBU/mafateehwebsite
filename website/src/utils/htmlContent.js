@@ -13,9 +13,50 @@ const BASIC_TAGS = new Set([
   'h4',
   'h5',
   'h6',
+  'a',
 ])
 
 const EXTENDED_TAGS = new Set([...BASIC_TAGS, 'span', 'hr', 'font'])
+
+/**
+ * @param {string} href
+ * @returns {boolean}
+ */
+function isSafeHref(href) {
+  const value = String(href ?? '').trim()
+  if (!value) return false
+  if (/^\s*javascript:/i.test(value) || /^\s*data:/i.test(value)) return false
+  return /^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value)
+}
+
+/**
+ * @param {string} href
+ * @returns {string}
+ */
+function normalizeHref(href) {
+  const value = String(href ?? '').trim()
+  if (!value) return ''
+  if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value)) return value
+  if (/^[\w.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value)) return `https://${value}`
+  return value
+}
+
+/**
+ * @param {string} attrs
+ * @returns {string}
+ */
+function sanitizeAnchorOpen(attrs) {
+  const hrefMatch = attrs.match(/\bhref=["']([^"']*)["']/i)
+  if (!hrefMatch) return ''
+  const href = normalizeHref(hrefMatch[1])
+  if (!isSafeHref(href)) return ''
+  const safeHref = href.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+  // mailto/tel stay in-place; everything else opens in a new tab
+  if (/^(mailto:|tel:)/i.test(href)) {
+    return `<a href="${safeHref}">`
+  }
+  return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">`
+}
 
 const ALLOWED_SPAN_CLASSES = new Set(['text-primary', 'text-secondary'])
 
@@ -160,11 +201,26 @@ export function sanitizeRichHtml(input, options = {}) {
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
 
+  let anchorDepth = 0
   out = out.replace(/<\/?([a-z][a-z0-9]*)\b([^>]*)>/gi, (match, tagName, attrs) => {
     const tag = tagName.toLowerCase()
     const isClose = match.startsWith('</')
 
     if (!allowed.has(tag)) return ''
+
+    if (tag === 'a') {
+      if (isClose) {
+        if (anchorDepth > 0) {
+          anchorDepth -= 1
+          return '</a>'
+        }
+        return ''
+      }
+      const open = sanitizeAnchorOpen(attrs)
+      if (!open) return ''
+      anchorDepth += 1
+      return open
+    }
 
     if (tag === 'span') {
       if (!extended) return ''

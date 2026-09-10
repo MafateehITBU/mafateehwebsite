@@ -1,11 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BoldOutlined,
   ItalicOutlined,
   LineOutlined,
+  LinkOutlined,
   UnderlineOutlined,
+  DisconnectOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, Space, Tooltip, Typography } from "antd";
+import { Button, Divider, Form, Input, Modal, Space, Tooltip, Typography } from "antd";
 
 export const RICH_COLOR_PRIMARY = "#00502e";
 export const RICH_COLOR_SECONDARY = "#dfb026";
@@ -48,7 +50,30 @@ function stripTags(html: string): string {
 
 const ALLOWED_COLOR_CLASSES = new Set(["text-primary", "text-secondary"]);
 
-/** Unwrap browser-generated spans (styles) that are not brand color spans. */
+/** Safe href for editor links (http(s), mailto, tel, relative, hash). */
+export function isSafeHref(href: string): boolean {
+  const value = String(href ?? "").trim();
+  if (!value) return false;
+  if (/^\s*javascript:/i.test(value) || /^\s*data:/i.test(value)) return false;
+  return /^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value);
+}
+
+function normalizeHref(raw: string): string {
+  const value = String(raw ?? "").trim();
+  if (!value) return "";
+  if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value)) return value;
+  // Bare domains → https
+  if (/^[\w.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value)) {
+    return `https://${value}`;
+  }
+  return value;
+}
+
+function isExternalHref(href: string): boolean {
+  return /^(https?:\/\/|\/|#)/i.test(href);
+}
+
+/** Unwrap browser-generated spans (styles) that are not brand color spans; keep safe anchors. */
 function normalizeEditorHtml(html: string): string {
   if (!html?.trim()) return html;
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -74,7 +99,39 @@ function normalizeEditorHtml(html: string): string {
     font.remove();
   });
 
+  body.querySelectorAll("a").forEach((anchor) => {
+    const href = normalizeHref(anchor.getAttribute("href") ?? "");
+    if (!isSafeHref(href)) {
+      const parent = anchor.parentNode;
+      if (!parent) return;
+      while (anchor.firstChild) {
+        parent.insertBefore(anchor.firstChild, anchor);
+      }
+      anchor.remove();
+      return;
+    }
+    anchor.setAttribute("href", href);
+    if (isExternalHref(href)) {
+      anchor.setAttribute("target", "_blank");
+      anchor.setAttribute("rel", "noopener noreferrer");
+    } else {
+      anchor.removeAttribute("target");
+      anchor.removeAttribute("rel");
+    }
+  });
+
   return body.innerHTML;
+}
+
+function findAnchorInSelection(): HTMLAnchorElement | null {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  let node: Node | null = sel.anchorNode;
+  while (node) {
+    if (node instanceof HTMLAnchorElement) return node;
+    node = node.parentNode;
+  }
+  return null;
 }
 
 export function RichHtmlEditor({
@@ -87,6 +144,10 @@ export function RichHtmlEditor({
 }: RichHtmlEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const lastEmitted = useRef<string | undefined>(undefined);
+  const savedRange = useRef<Range | null>(null);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkForm] = Form.useForm<{ url: string }>();
 
   useEffect(() => {
     const el = editorRef.current;
@@ -100,8 +161,8 @@ export function RichHtmlEditor({
 
   const emitChange = () => {
     const raw = editorRef.current?.innerHTML ?? "";
-    const html = extended ? normalizeEditorHtml(raw) : raw;
-    if (extended && html !== raw && editorRef.current) {
+    const html = normalizeEditorHtml(raw);
+    if (html !== raw && editorRef.current) {
       editorRef.current.innerHTML = html;
     }
     lastEmitted.current = html;
@@ -143,7 +204,7 @@ export function RichHtmlEditor({
       document.execCommand(
         "insertHTML",
         false,
-        `<span class="${className}">${text}</span>`
+        `<span class="${className}">${text}</span>`,
       );
     }
     emitChange();
@@ -163,106 +224,241 @@ export function RichHtmlEditor({
     emitChange();
   };
 
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) {
+      savedRange.current = null;
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    if (!editorRef.current?.contains(range.commonAncestorContainer)) {
+      savedRange.current = null;
+      return;
+    }
+    savedRange.current = range.cloneRange();
+  };
+
+  const restoreSelection = () => {
+    const range = savedRange.current;
+    const el = editorRef.current;
+    if (!range || !el) return false;
+    el.focus();
+    const sel = window.getSelection();
+    if (!sel) return false;
+    sel.removeAllRanges();
+    sel.addRange(range);
+    return true;
+  };
+
+  const openLinkModal = () => {
+    saveSelection();
+    const existing = findAnchorInSelection();
+    const initial = existing?.getAttribute("href") ?? "https://";
+    setLinkUrl(initial);
+    linkForm.setFieldsValue({ url: initial });
+    setLinkOpen(true);
+  };
+
+  const applyLink = async () => {
+    try {
+      const values = await linkForm.validateFields();
+      const href = normalizeHref(values.url);
+      if (!isSafeHref(href)) {
+        linkForm.setFields([
+          {
+            name: "url",
+            errors: ["Enter a valid URL (https://…, /path, #anchor, mailto:, or tel:)"],
+          },
+        ]);
+        return;
+      }
+
+      restoreSelection();
+      const sel = window.getSelection();
+      const existing = findAnchorInSelection();
+
+      if (existing) {
+        existing.setAttribute("href", href);
+        if (isExternalHref(href)) {
+          existing.setAttribute("target", "_blank");
+          existing.setAttribute("rel", "noopener noreferrer");
+        } else {
+          existing.removeAttribute("target");
+          existing.removeAttribute("rel");
+        }
+      } else if (sel && !sel.isCollapsed) {
+        document.execCommand("createLink", false, href);
+        // Harden attributes on newly created anchors in the selection
+        const anchors = editorRef.current?.querySelectorAll("a[href]") ?? [];
+        anchors.forEach((anchor) => {
+          const aHref = normalizeHref(anchor.getAttribute("href") ?? "");
+          if (!isSafeHref(aHref)) return;
+          anchor.setAttribute("href", aHref);
+          if (isExternalHref(aHref)) {
+            anchor.setAttribute("target", "_blank");
+            anchor.setAttribute("rel", "noopener noreferrer");
+          }
+        });
+      } else {
+        // No selection: insert linked text equal to the URL
+        const label = href.replace(/^https?:\/\//i, "");
+        document.execCommand(
+          "insertHTML",
+          false,
+          isExternalHref(href)
+            ? `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`
+            : `<a href="${href}">${label}</a>`,
+        );
+      }
+
+      setLinkOpen(false);
+      emitChange();
+    } catch {
+      /* validation failed */
+    }
+  };
+
+  const removeLink = () => {
+    editorRef.current?.focus();
+    const existing = findAnchorInSelection();
+    if (existing) {
+      const parent = existing.parentNode;
+      if (parent) {
+        while (existing.firstChild) {
+          parent.insertBefore(existing.firstChild, existing);
+        }
+        existing.remove();
+      }
+    } else {
+      document.execCommand("unlink");
+    }
+    emitChange();
+  };
+
   const isEmpty = !value || value === "<br>" || !stripTags(value).trim();
+  const surfaceMaxHeight = Math.max(minHeight, 320);
 
   return (
     <div className="rich-html-editor">
-      <Space wrap className="rich-html-editor__toolbar" split={<Divider type="vertical" />}>
-        <Space size={4} wrap>
-          {HEADING_BUTTONS.map(({ tag, label }) => (
+      <div className="rich-html-editor__toolbar">
+        <Space wrap split={<Divider type="vertical" />}>
+          <Space size={4} wrap>
+            {HEADING_BUTTONS.map(({ tag, label }) => (
+              <Button
+                key={tag}
+                size="small"
+                type="text"
+                aria-label={`Heading ${label}`}
+                className="rich-html-editor__heading-btn"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyBlock(tag)}
+              >
+                {label}
+              </Button>
+            ))}
             <Button
-              key={tag}
               size="small"
               type="text"
-              aria-label={`Heading ${label}`}
+              aria-label="Paragraph"
               className="rich-html-editor__heading-btn"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => applyBlock(tag)}
+              onClick={() => applyBlock("p")}
             >
-              {label}
+              P
             </Button>
-          ))}
-          <Button
-            size="small"
-            type="text"
-            aria-label="Paragraph"
-            className="rich-html-editor__heading-btn"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => applyBlock("p")}
-          >
-            P
-          </Button>
-        </Space>
+          </Space>
 
-        <Space size={4}>
-          <Button
-            type="text"
-            aria-label="Bold"
-            icon={<BoldOutlined />}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => applyFormat("bold")}
-          />
-          <Button
-            type="text"
-            aria-label="Italic"
-            icon={<ItalicOutlined />}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => applyFormat("italic")}
-          />
-          <Button
-            type="text"
-            aria-label="Underline"
-            icon={<UnderlineOutlined />}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => applyFormat("underline")}
-          />
-        </Space>
-
-        {extended ? (
           <Space size={4}>
-            <Tooltip title={`Primary (${RICH_COLOR_PRIMARY})`}>
+            <Button
+              type="text"
+              aria-label="Bold"
+              icon={<BoldOutlined />}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyFormat("bold")}
+            />
+            <Button
+              type="text"
+              aria-label="Italic"
+              icon={<ItalicOutlined />}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyFormat("italic")}
+            />
+            <Button
+              type="text"
+              aria-label="Underline"
+              icon={<UnderlineOutlined />}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyFormat("underline")}
+            />
+          </Space>
+
+          <Space size={4}>
+            <Tooltip title="Insert or edit link">
               <Button
-                size="small"
                 type="text"
-                aria-label="Primary color"
-                className="rich-html-editor__color-btn"
+                aria-label="Insert link"
+                icon={<LinkOutlined />}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => applyColorClass("text-primary")}
-              >
-                <span
-                  className="rich-html-editor__swatch"
-                  style={{ backgroundColor: RICH_COLOR_PRIMARY }}
-                />
-              </Button>
+                onClick={openLinkModal}
+              />
             </Tooltip>
-            <Tooltip title={`Secondary (${RICH_COLOR_SECONDARY})`}>
+            <Tooltip title="Remove link">
               <Button
-                size="small"
                 type="text"
-                aria-label="Secondary color"
-                className="rich-html-editor__color-btn"
+                aria-label="Remove link"
+                icon={<DisconnectOutlined />}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => applyColorClass("text-secondary")}
-              >
-                <span
-                  className="rich-html-editor__swatch"
-                  style={{ backgroundColor: RICH_COLOR_SECONDARY }}
-                />
-              </Button>
-            </Tooltip>
-            <Tooltip title="Horizontal line">
-              <Button
-                size="small"
-                type="text"
-                aria-label="Insert horizontal line"
-                icon={<LineOutlined />}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={insertDivider}
+                onClick={removeLink}
               />
             </Tooltip>
           </Space>
-        ) : null}
-      </Space>
+
+          {extended ? (
+            <Space size={4}>
+              <Tooltip title={`Primary (${RICH_COLOR_PRIMARY})`}>
+                <Button
+                  size="small"
+                  type="text"
+                  aria-label="Primary color"
+                  className="rich-html-editor__color-btn"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => applyColorClass("text-primary")}
+                >
+                  <span
+                    className="rich-html-editor__swatch"
+                    style={{ backgroundColor: RICH_COLOR_PRIMARY }}
+                  />
+                </Button>
+              </Tooltip>
+              <Tooltip title={`Secondary (${RICH_COLOR_SECONDARY})`}>
+                <Button
+                  size="small"
+                  type="text"
+                  aria-label="Secondary color"
+                  className="rich-html-editor__color-btn"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => applyColorClass("text-secondary")}
+                >
+                  <span
+                    className="rich-html-editor__swatch"
+                    style={{ backgroundColor: RICH_COLOR_SECONDARY }}
+                  />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Horizontal line">
+                <Button
+                  size="small"
+                  type="text"
+                  aria-label="Insert horizontal line"
+                  icon={<LineOutlined />}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={insertDivider}
+                />
+              </Tooltip>
+            </Space>
+          ) : null}
+        </Space>
+      </div>
 
       <div
         ref={editorRef}
@@ -277,7 +473,7 @@ export function RichHtmlEditor({
         role="textbox"
         aria-multiline
         data-placeholder={placeholder}
-        style={{ minHeight }}
+        style={{ minHeight, maxHeight: surfaceMaxHeight }}
         suppressContentEditableWarning
         onInput={emitChange}
         onBlur={emitChange}
@@ -286,10 +482,37 @@ export function RichHtmlEditor({
       {isEmpty ? (
         <Typography.Text type="secondary" style={{ display: "block", marginTop: 6, fontSize: 12 }}>
           {extended
-            ? "Headings, bold/italic/underline, brand colors, and horizontal lines are supported."
-            : "Use H1–H6 for headings, P for normal text, and the icons for bold, italic, and underline."}
+            ? "Headings, bold/italic/underline, links, brand colors, and horizontal lines are supported."
+            : "Use H1–H6 for headings, P for normal text, and the icons for bold, italic, underline, and links."}
         </Typography.Text>
       ) : null}
+
+      <Modal
+        title="Insert link"
+        open={linkOpen}
+        onOk={applyLink}
+        onCancel={() => setLinkOpen(false)}
+        okText="Apply"
+        destroyOnClose
+      >
+        <Form form={linkForm} layout="vertical" initialValues={{ url: linkUrl }}>
+          <Form.Item
+            name="url"
+            label="URL"
+            rules={[{ required: true, message: "URL is required" }]}
+            extra="Examples: https://example.com, /en/contact, #section, mailto:hello@example.com"
+          >
+            <Input
+              autoFocus
+              placeholder="https://example.com"
+              onPressEnter={(e) => {
+                e.preventDefault();
+                void applyLink();
+              }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

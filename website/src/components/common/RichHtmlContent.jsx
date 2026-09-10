@@ -2,7 +2,7 @@ import { MultilineText } from './MultilineText.jsx'
 import { looksLikeHtml, sanitizeBlogHtml, sanitizeRichHtml } from '../../utils/htmlContent.js'
 
 /**
- * Renders sanitized blog HTML (bold, italic, underline, line breaks) or plain text fallback.
+ * Renders sanitized rich HTML (bold, italic, underline, links, line breaks) or plain text fallback.
  * @param {{
  *   html?: string | null,
  *   as?: 'div' | 'p' | 'article',

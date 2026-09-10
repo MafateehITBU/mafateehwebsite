@@ -13,6 +13,7 @@ const BASIC_TAGS = new Set([
   "h4",
   "h5",
   "h6",
+  "a",
 ]);
 
 const EXTENDED_TAGS = new Set([...BASIC_TAGS, "span", "hr", "font"]);
@@ -44,6 +45,34 @@ export type SanitizeRichHtmlOptions = {
 function normalizeFontColor(raw: string): string | null {
   const key = raw.trim().toLowerCase().replace(/\s/g, "");
   return ALLOWED_FONT_COLORS.get(key) ?? null;
+}
+
+function isSafeHref(href: string): boolean {
+  const value = String(href ?? "").trim();
+  if (!value) return false;
+  if (/^\s*javascript:/i.test(value) || /^\s*data:/i.test(value)) return false;
+  return /^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value);
+}
+
+function normalizeHref(href: string): string {
+  const value = String(href ?? "").trim();
+  if (!value) return "";
+  if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value)) return value;
+  if (/^[\w.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value)) return `https://${value}`;
+  return value;
+}
+
+/** Keep only safe hrefs; open navigational links in a new tab. */
+function sanitizeAnchorOpen(attrs: string): string {
+  const hrefMatch = attrs.match(/\bhref=["']([^"']*)["']/i);
+  if (!hrefMatch) return "";
+  const href = normalizeHref(hrefMatch[1]);
+  if (!isSafeHref(href)) return "";
+  const safeHref = href.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+  if (/^(mailto:|tel:)/i.test(href)) {
+    return `<a href="${safeHref}">`;
+  }
+  return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">`;
 }
 
 function sanitizeSpanOpen(attrs: string): string {
@@ -96,11 +125,26 @@ export function sanitizeRichHtml(input: string, options: SanitizeRichHtmlOptions
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
 
+  let anchorDepth = 0;
   out = out.replace(/<\/?([a-z][a-z0-9]*)\b([^>]*)>/gi, (match, tagName: string, attrs: string) => {
     const tag = tagName.toLowerCase();
     const isClose = match.startsWith("</");
 
     if (!allowed.has(tag)) return "";
+
+    if (tag === "a") {
+      if (isClose) {
+        if (anchorDepth > 0) {
+          anchorDepth -= 1;
+          return "</a>";
+        }
+        return "";
+      }
+      const open = sanitizeAnchorOpen(attrs);
+      if (!open) return "";
+      anchorDepth += 1;
+      return open;
+    }
 
     if (tag === "span") {
       if (!extended) return "";
@@ -127,7 +171,7 @@ export function sanitizeRichHtml(input: string, options: SanitizeRichHtmlOptions
   return out;
 }
 
-/** Blog posts: headings and inline styles only. */
+/** Blog posts: headings, inline styles, and safe links. */
 export function sanitizeBlogHtml(input: string): string {
   return sanitizeRichHtml(input, { extended: false });
 }

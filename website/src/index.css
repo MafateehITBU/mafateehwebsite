@@ -931,6 +931,20 @@ html.dark {
     text-decoration: underline;
   }
 
+  .rich-html a {
+    color: var(--color-primary, #00502e);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .rich-html a:hover {
+    opacity: 0.85;
+  }
+
+  html.dark .rich-html a {
+    color: var(--color-secondary, #dfb026);
+  }
+
   .rich-html p {
     margin: 0 0 1em;
   }
