@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import api from '../axiosConfig.js'
 import { readCookieConsent } from '../components/common/CookieConsent.jsx'
 import { localizedPath, stripLocalePrefix } from '../utils/localePath.js'
+import { initChatGptPixel } from '../utils/chatgptPixel.js'
 import { useLanguage } from './useLanguage.js'
 import { useStaticInfo } from './StaticInfoContext.jsx'
 
@@ -163,6 +164,12 @@ export function SeoProvider({ children }) {
     window.addEventListener('mafateeh-cookie-consent', onConsent)
     return () => window.removeEventListener('mafateeh-cookie-consent', onConsent)
   }, [])
+
+  useEffect(() => {
+    if (!analyticsAllowed) return undefined
+    initChatGptPixel()
+    return undefined
+  }, [analyticsAllowed])
 
   const socialSameAs = useMemo(() => {
     const links = staticInfo?.socialLinks?.map((l) => l.url).filter(Boolean) ?? []

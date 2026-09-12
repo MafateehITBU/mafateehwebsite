@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Icon } from '@iconify/react'
 import api from '../../axiosConfig.js'
 import { getApiErrorMessage } from '../../utils/apiError.js'
+import { trackChatGptLeadCreated } from '../../utils/chatgptPixel.js'
 import { validateContactForm } from '../../utils/contactFormValidation.js'
 import { notify } from '../../utils/notify.js'
 
@@ -83,6 +84,7 @@ export function ContactForm({ copy, locale }) {
           event_label: service || 'general',
         })
       }
+      trackChatGptLeadCreated()
       notify.success(copy.success)
       setName('')
       setPhoneNumber('')
