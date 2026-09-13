@@ -183,6 +183,55 @@ function insertHtmlAtCaret(html: string) {
   }
 }
 
+/** True when clipboard HTML has real hyperlinks (href), not just <a name>. */
+function htmlHasHyperlinks(html: string): boolean {
+  return /<a\b[^>]*\bhref\s*=\s*["'][^"']+["']/i.test(html);
+}
+
+/**
+ * Clean Word/Office paste HTML while preserving hyperlinks on words
+ * (e.g. Arabic link text → https URL).
+ */
+function cleanPastedHtml(html: string): string {
+  if (!html?.trim()) return "";
+  let raw = html
+    // Word conditional comments / fragment markers
+    .replace(/<!--\[if[\s\S]*?<!\[endif\]-->/gi, "")
+    .replace(/<\/?(?:xml|meta|link|style)[^>]*>/gi, "")
+    .replace(/<\/?(?:o|w|m|v):[^>]*>/gi, "");
+
+  const doc = new DOMParser().parseFromString(raw, "text/html");
+  const body = doc.body;
+
+  // Drop Word bookmark-only anchors (no href)
+  body.querySelectorAll("a:not([href])").forEach((a) => {
+    const parent = a.parentNode;
+    if (!parent) return;
+    while (a.firstChild) parent.insertBefore(a.firstChild, a);
+    a.remove();
+  });
+
+  // Linkify bare URLs in text that is not already inside an <a>
+  const walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  const toLinkify: Text[] = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    if (node.parentElement?.closest("a")) continue;
+    if (plainTextHasUrl(node.nodeValue || "")) toLinkify.push(node);
+  }
+  for (const node of toLinkify) {
+    const linked = linkifyPlainText(node.nodeValue || "");
+    const wrap = doc.createElement("span");
+    wrap.innerHTML = linked;
+    const parent = node.parentNode;
+    if (!parent) continue;
+    while (wrap.firstChild) parent.insertBefore(wrap.firstChild, node);
+    parent.removeChild(node);
+  }
+
+  return normalizeEditorHtml(body.innerHTML);
+}
+
 /** Unwrap browser-generated spans (styles) that are not brand color spans; keep safe anchors. */
 function normalizeEditorHtml(html: string): string {
   if (!html?.trim()) return html;
@@ -221,7 +270,13 @@ function normalizeEditorHtml(html: string): string {
       return;
     }
     anchor.setAttribute("href", href);
-    anchor.setAttribute("dir", "ltr");
+    // Keep Latin URL labels LTR; leave Arabic/other link text in natural direction
+    const label = (anchor.textContent || "").trim();
+    if (/^(https?:\/\/|www\.|[A-Za-z0-9._-]+\.[a-z]{2,})/i.test(label)) {
+      anchor.setAttribute("dir", "ltr");
+    } else {
+      anchor.removeAttribute("dir");
+    }
     if (isExternalHref(href)) {
       anchor.setAttribute("target", "_blank");
       anchor.setAttribute("rel", "noopener noreferrer");
@@ -446,7 +501,7 @@ export function RichHtmlEditor({
     emitChange();
   };
 
-  /** Paste: auto-convert URLs in plain text into clickable links (LTR + RTL). */
+  /** Paste: keep Word hyperlinks; also auto-link bare URLs. */
   const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
     const clipboard = event.clipboardData;
     if (!clipboard) return;
@@ -455,26 +510,18 @@ export function RichHtmlEditor({
     const plain = clipboard.getData("text/plain");
     const plainClean = stripFormatChars(plain || "");
 
-    // Prefer plain text when it contains URLs so we control link markup.
-    // Cleaning bidi marks first is required for Arabic/RTL paste.
-    if (plainClean && plainTextHasUrl(plainClean)) {
+    // Word/docs: prefer HTML when it already has <a href> so linked WORDS survive.
+    // (Previously plain-text linkify ran first and dropped those hyperlinks.)
+    if (html && htmlHasHyperlinks(html)) {
       event.preventDefault();
-      insertHtmlAtCaret(linkifyPlainText(plainClean));
-      emitChange();
-      return;
-    }
-
-    // HTML paste that already includes anchors — insert cleaned HTML.
-    if (html && /<a\b/i.test(html)) {
-      event.preventDefault();
-      const cleaned = normalizeEditorHtml(html);
+      const cleaned = cleanPastedHtml(html);
       insertHtmlAtCaret(cleaned || linkifyPlainText(plainClean || ""));
       emitChange();
       return;
     }
 
-    // HTML paste without <a> but whose text content has a URL (common from Word/RTL).
-    if (html && plainClean && plainTextHasUrl(plainClean)) {
+    // Plain text (or HTML without anchors) that contains bare URLs.
+    if (plainClean && plainTextHasUrl(plainClean)) {
       event.preventDefault();
       insertHtmlAtCaret(linkifyPlainText(plainClean));
       emitChange();
