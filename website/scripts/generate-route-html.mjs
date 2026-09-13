@@ -3,7 +3,7 @@
  * Post-build: generate per-route index.html shells with crawler-visible SEO metadata.
  * Keeps React SPA + nginx; no SSR framework migration.
  */
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rm, writeFile, stat } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -25,6 +25,9 @@ const FALLBACK_BLOG_SLUGS = [
   'is-your-marketing-a-revenue-engine-or-just-noise',
 ]
 
+/**
+ * @returns {Promise<{ blogs: Array<{ slug: string, title?: string, titleAr?: string }>, fromApi: boolean }>}
+ */
 async function fetchPublishedBlogs() {
   try {
     const res = await fetch(`${API_BASE}/public/blogs`, {
@@ -33,10 +36,44 @@ async function fetchPublishedBlogs() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const rows = await res.json()
     if (!Array.isArray(rows) || rows.length === 0) throw new Error('empty')
-    return rows.filter((b) => b?.slug && b?.published !== false)
+    return {
+      blogs: rows.filter((b) => b?.slug && b?.published !== false),
+      fromApi: true,
+    }
   } catch (err) {
     console.warn(`Blog API unavailable (${err.message}); using fallback slugs.`)
-    return FALLBACK_BLOG_SLUGS.map((slug) => ({ slug, title: slug, titleAr: slug }))
+    return {
+      blogs: FALLBACK_BLOG_SLUGS.map((slug) => ({ slug, title: slug, titleAr: slug })),
+      fromApi: false,
+    }
+  }
+}
+
+/** Remove blog shells for slugs that are no longer published (only when API succeeded). */
+async function pruneStaleBlogShells(liveSlugs) {
+  const keep = new Set(liveSlugs)
+  for (const locale of LOCALES) {
+    const blogsDir = join(DIST, locale, 'blogs')
+    let entries = []
+    try {
+      entries = await readdir(blogsDir)
+    } catch {
+      continue
+    }
+    for (const name of entries) {
+      if (name.startsWith('.')) continue
+      const full = join(blogsDir, name)
+      let isDir = false
+      try {
+        isDir = (await stat(full)).isDirectory()
+      } catch {
+        continue
+      }
+      if (!isDir) continue
+      if (keep.has(name)) continue
+      await rm(full, { recursive: true, force: true })
+      console.log(`Pruned stale blog shell: /${locale}/blogs/${name}`)
+    }
   }
 }
 
@@ -93,7 +130,7 @@ async function writeRouteHtml(baseHtml, locale, logicalPath, blog, fontPreloads)
 async function main() {
   const baseHtml = await readFile(join(DIST, 'index.html'), 'utf8')
   const fontPreloads = await loadFontPreloads()
-  const blogs = await fetchPublishedBlogs()
+  const { blogs, fromApi } = await fetchPublishedBlogs()
   const written = []
 
   for (const locale of LOCALES) {
@@ -106,6 +143,10 @@ async function main() {
       const url = await writeRouteHtml(baseHtml, locale, logicalPath, blog, fontPreloads)
       written.push(url)
     }
+  }
+
+  if (fromApi) {
+    await pruneStaleBlogShells(blogs.map((b) => b.slug))
   }
 
   const enHomeMeta = buildRouteDocumentMeta({ locale: 'en', logicalPath: '/' })

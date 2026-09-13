@@ -17,6 +17,7 @@ COPY nginx.default.conf /etc/nginx/conf.d/default.conf
 
 # Minimal sources for scripts/generate-route-html.mjs
 COPY --from=builder /app/scripts/generate-route-html.mjs /app/scripts/generate-route-html.mjs
+COPY --from=builder /app/scripts/route-shell-hook.mjs /app/scripts/route-shell-hook.mjs
 COPY --from=builder /app/src/seo /app/src/seo
 COPY --from=builder /app/src/content/pages.js /app/src/content/pages.js
 COPY --from=builder /app/src/content/home.js /app/src/content/home.js
@@ -31,7 +32,9 @@ WORKDIR /app
 
 ENV HTML_DIST=/usr/share/nginx/html
 ENV VITE_API_BASE_URL=http://backend:4000/api
-ENV ROUTE_HTML_REFRESH_SECONDS=120
+# 0 = no polling; regenerate on container start + on blog publish via hook
+ENV ROUTE_HTML_REFRESH_SECONDS=0
+ENV ROUTE_SHELL_HOOK_PORT=9090
 
 EXPOSE 80
 ENTRYPOINT ["/docker-entrypoint.sh"]

@@ -18,6 +18,7 @@ import { asyncHandler } from "../../middleware/asyncHandler";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth";
 import { requirePermission } from "../../middleware/requirePermission";
 import { uploadMemory } from "../../middleware/upload";
+import { requestRouteShellRegen } from "../../lib/routeShellRegen";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -557,6 +558,7 @@ adminRouter.post(
       where: { id: blog.id },
       include: { category: true, tags: { include: { tag: true } } },
     });
+    requestRouteShellRegen("blog-create");
     res.status(201).json(full);
   })
 );
@@ -605,6 +607,7 @@ adminRouter.put(
       where: { id: existing.id },
       include: { category: true, tags: { include: { tag: true } } },
     });
+    requestRouteShellRegen("blog-update");
     res.json(full);
   })
 );
@@ -614,6 +617,7 @@ adminRouter.delete(
   requirePermission("blogs"),
   asyncHandler(async (req, res) => {
     await prisma.blog.delete({ where: { id: req.params.id } });
+    requestRouteShellRegen("blog-delete");
     res.status(204).send();
   })
 );

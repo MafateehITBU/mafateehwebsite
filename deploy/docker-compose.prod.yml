@@ -19,6 +19,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./config/backend.env
+    environment:
+      ROUTE_SHELL_HOOK_URL: http://website:9090/regenerate
     depends_on:
       postgres:
         condition: service_healthy
@@ -34,7 +36,8 @@ services:
     environment:
       VITE_API_BASE_URL: http://backend:4000/api
       HTML_DIST: /usr/share/nginx/html
-      ROUTE_HTML_REFRESH_SECONDS: "120"
+      ROUTE_HTML_REFRESH_SECONDS: "0"
+      ROUTE_SHELL_HOOK_PORT: "9090"
     restart: unless-stopped
     depends_on:
       - backend
