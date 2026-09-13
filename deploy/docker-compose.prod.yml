@@ -31,7 +31,13 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: https://api.mafateehgroup.com/api
+    environment:
+      VITE_API_BASE_URL: http://backend:4000/api
+      HTML_DIST: /usr/share/nginx/html
+      ROUTE_HTML_REFRESH_SECONDS: "120"
     restart: unless-stopped
+    depends_on:
+      - backend
     expose:
       - "80"
 

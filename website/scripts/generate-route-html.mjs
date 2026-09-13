@@ -15,7 +15,8 @@ import {
 } from '../src/seo/routeMeta.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DIST = join(__dirname, '..', 'dist')
+/** Output dir: build uses ../dist; container regen uses /usr/share/nginx/html via HTML_DIST. */
+const DIST = process.env.HTML_DIST || join(__dirname, '..', 'dist')
 const API_BASE = process.env.VITE_API_BASE_URL || 'https://api.mafateehgroup.com/api'
 
 const FALLBACK_BLOG_SLUGS = [
