@@ -81,53 +81,106 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/** Match http(s), www., or bare domains; trailing .,;:!? are not part of the URL. */
+/**
+ * Strip bidi / zero-width format chars that RTL editors and Windows
+ * often inject around Latin URLs when pasting into Arabic text.
+ */
+function stripFormatChars(text: string): string {
+  return String(text ?? "").replace(
+    /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]/g,
+    "",
+  );
+}
+
+/**
+ * Match http(s), www., or bare domains.
+ * Avoid `\b` alone — it fails next to some Unicode / bidi edges in RTL paste.
+ */
 const URL_IN_TEXT_RE =
-  /\b((?:https?:\/\/|www\.)[^\s<>"'()]+|(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s<>"'()]*)?)/gi;
+  /(?:^|[^A-Za-z0-9_/@.-])((?:https?:\/\/|www\.)[^\s<>"'()[\]]+|(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s<>"'()[\]]*)?)/gi;
 
 function trimTrailingPunctuation(raw: string): { url: string; trail: string } {
-  const match = raw.match(/^(.*?)([.,;:!?)]*)$/);
+  // Include Arabic punctuation (، ؛ ؟ ۔) and common closers
+  const match = raw.match(/^(.*?)([.,;:!?)}\]،؛؟۔»"']*)$/u);
   if (!match) return { url: raw, trail: "" };
   return { url: match[1], trail: match[2] };
 }
 
 function buildAnchorHtml(rawUrl: string): string | null {
-  const { url: trimmed, trail } = trimTrailingPunctuation(rawUrl.trim());
+  const cleaned = stripFormatChars(rawUrl);
+  const { url: trimmed, trail } = trimTrailingPunctuation(cleaned.trim());
   if (!trimmed) return null;
   const href = normalizeHref(trimmed);
   if (!isSafeHref(href)) return null;
   const label = escapeHtml(trimmed);
   const safeHref = escapeHtml(href);
   const anchor = isExternalHref(href)
-    ? `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">${label}</a>`
-    : `<a href="${safeHref}">${label}</a>`;
+    ? `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" dir="ltr">${label}</a>`
+    : `<a href="${safeHref}" dir="ltr">${label}</a>`;
   return trail ? `${anchor}${escapeHtml(trail)}` : anchor;
+}
+
+/** True if cleaned plain text contains something that looks like a URL. */
+function plainTextHasUrl(text: string): boolean {
+  const cleaned = stripFormatChars(text);
+  return /(?:https?:\/\/|www\.|(?:[\w-]+\.)+[a-z]{2,})/i.test(cleaned);
 }
 
 /** Turn plain text into HTML, auto-wrapping detected URLs as anchors. */
 function linkifyPlainText(text: string): string {
+  const cleaned = stripFormatChars(text);
   const parts: string[] = [];
   let last = 0;
   const re = new RegExp(URL_IN_TEXT_RE.source, "gi");
   let match: RegExpExecArray | null;
-  while ((match = re.exec(text)) !== null) {
-    if (match.index > last) {
-      parts.push(escapeHtml(text.slice(last, match.index)).replace(/\n/g, "<br>"));
+  while ((match = re.exec(cleaned)) !== null) {
+    const full = match[0];
+    const urlPart = match[1];
+    const urlStart = match.index + (full.length - urlPart.length);
+    if (urlStart > last) {
+      parts.push(escapeHtml(cleaned.slice(last, urlStart)).replace(/\n/g, "<br>"));
     }
-    const linked = buildAnchorHtml(match[1]);
-    parts.push(linked ?? escapeHtml(match[1]));
-    last = match.index + match[0].length;
+    const linked = buildAnchorHtml(urlPart);
+    parts.push(linked ?? escapeHtml(urlPart));
+    last = match.index + full.length;
   }
-  if (last < text.length) {
-    parts.push(escapeHtml(text.slice(last)).replace(/\n/g, "<br>"));
+  if (last < cleaned.length) {
+    parts.push(escapeHtml(cleaned.slice(last)).replace(/\n/g, "<br>"));
   }
-  return parts.join("") || escapeHtml(text).replace(/\n/g, "<br>");
+  return parts.join("") || escapeHtml(cleaned).replace(/\n/g, "<br>");
 }
 
 function looksLikeUrlToken(token: string): boolean {
-  const { url } = trimTrailingPunctuation(token.trim());
+  const { url } = trimTrailingPunctuation(stripFormatChars(token).trim());
   if (!url) return false;
   return isSafeHref(normalizeHref(url));
+}
+
+/** Insert HTML at the current caret (more reliable than execCommand in RTL). */
+function insertHtmlAtCaret(html: string) {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) {
+    document.execCommand("insertHTML", false, html);
+    return;
+  }
+  const range = sel.getRangeAt(0);
+  range.deleteContents();
+  const temp = document.createElement("template");
+  temp.innerHTML = html;
+  const frag = document.createDocumentFragment();
+  let lastNode: ChildNode | null = null;
+  const nodes = temp.content.childNodes;
+  while (nodes.length > 0) {
+    lastNode = frag.appendChild(nodes[0]!);
+  }
+  range.insertNode(frag);
+  if (lastNode) {
+    const after = document.createRange();
+    after.setStartAfter(lastNode);
+    after.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(after);
+  }
 }
 
 /** Unwrap browser-generated spans (styles) that are not brand color spans; keep safe anchors. */
@@ -168,6 +221,7 @@ function normalizeEditorHtml(html: string): string {
       return;
     }
     anchor.setAttribute("href", href);
+    anchor.setAttribute("dir", "ltr");
     if (isExternalHref(href)) {
       anchor.setAttribute("target", "_blank");
       anchor.setAttribute("rel", "noopener noreferrer");
@@ -392,18 +446,20 @@ export function RichHtmlEditor({
     emitChange();
   };
 
-  /** Paste: auto-convert URLs in plain text into clickable links. */
+  /** Paste: auto-convert URLs in plain text into clickable links (LTR + RTL). */
   const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
     const clipboard = event.clipboardData;
     if (!clipboard) return;
 
     const html = clipboard.getData("text/html");
     const plain = clipboard.getData("text/plain");
+    const plainClean = stripFormatChars(plain || "");
 
     // Prefer plain text when it contains URLs so we control link markup.
-    if (plain && /(https?:\/\/|www\.|\b[\w-]+\.[a-z]{2,}\b)/i.test(plain)) {
+    // Cleaning bidi marks first is required for Arabic/RTL paste.
+    if (plainClean && plainTextHasUrl(plainClean)) {
       event.preventDefault();
-      document.execCommand("insertHTML", false, linkifyPlainText(plain));
+      insertHtmlAtCaret(linkifyPlainText(plainClean));
       emitChange();
       return;
     }
@@ -412,7 +468,15 @@ export function RichHtmlEditor({
     if (html && /<a\b/i.test(html)) {
       event.preventDefault();
       const cleaned = normalizeEditorHtml(html);
-      document.execCommand("insertHTML", false, cleaned || linkifyPlainText(plain || ""));
+      insertHtmlAtCaret(cleaned || linkifyPlainText(plainClean || ""));
+      emitChange();
+      return;
+    }
+
+    // HTML paste without <a> but whose text content has a URL (common from Word/RTL).
+    if (html && plainClean && plainTextHasUrl(plainClean)) {
+      event.preventDefault();
+      insertHtmlAtCaret(linkifyPlainText(plainClean));
       emitChange();
     }
   };
@@ -435,28 +499,54 @@ export function RichHtmlEditor({
     const caret = range.startOffset;
     if (caret < 1) return;
 
-    // Skip the just-typed delimiter (space / newline) when finding the word.
+    // Skip the just-typed delimiter (space / newline / Arabic separators).
     let end = caret;
     const justTyped = text[caret - 1];
-    if (justTyped === " " || justTyped === "\n" || justTyped === "\u00a0") {
+    if (
+      justTyped === " " ||
+      justTyped === "\n" ||
+      justTyped === "\u00a0" ||
+      justTyped === "\u2003" ||
+      justTyped === "،" ||
+      justTyped === "؛"
+    ) {
       end = caret - 1;
     }
     if (end <= 0) return;
 
     let start = end;
-    while (start > 0 && !/\s/.test(text[start - 1]!)) {
+    while (start > 0 && !/[\s\u00a0]/.test(text[start - 1]!)) {
       start -= 1;
     }
-    const token = text.slice(start, end);
+    const token = stripFormatChars(text.slice(start, end));
     if (!looksLikeUrlToken(token)) return;
 
     const { url, trail } = trimTrailingPunctuation(token);
     const href = normalizeHref(url);
     if (!isSafeHref(href)) return;
 
+    // Find the URL span inside the original text (may include invisible bidi marks).
+    const originalSlice = text.slice(start, end);
+    let consume = originalSlice.length;
+    if (trail) {
+      const trailIdx = originalSlice.lastIndexOf(trail);
+      if (trailIdx >= 0) consume = trailIdx;
+    }
+    // Prefer ending at the last ASCII URL character
+    const asciiUrlMatch = originalSlice.match(
+      /(?:https?:\/\/|www\.|(?:[\w-]+\.)+[a-z]{2,})[^\s]*/i,
+    );
+    if (asciiUrlMatch && asciiUrlMatch.index != null) {
+      consume = asciiUrlMatch.index + asciiUrlMatch[0].length;
+      // drop trailing punctuation from consume
+      while (consume > asciiUrlMatch.index && /[.,;:!?)}\]،؛؟۔»"']/.test(originalSlice[consume - 1]!)) {
+        consume -= 1;
+      }
+    }
+
     const wordRange = document.createRange();
     wordRange.setStart(node, start);
-    wordRange.setEnd(node, end - trail.length);
+    wordRange.setEnd(node, start + consume);
 
     const anchor = document.createElement("a");
     anchor.href = href;
@@ -465,13 +555,13 @@ export function RichHtmlEditor({
       anchor.rel = "noopener noreferrer";
     }
     anchor.textContent = url;
+    // Keep Latin URL direction readable inside RTL paragraphs
+    anchor.setAttribute("dir", "ltr");
 
     wordRange.deleteContents();
     wordRange.insertNode(anchor);
 
-    // Keep caret after the link (+ trailing punct / space still in the text node).
     const after = document.createRange();
-    after.setStart(anchor.nextSibling ?? anchor.parentNode!, 0);
     if (anchor.nextSibling && anchor.nextSibling.nodeType === Node.TEXT_NODE) {
       after.setStart(anchor.nextSibling, 0);
     } else {

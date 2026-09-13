@@ -1310,6 +1310,8 @@ body {
 .rich-html-editor__surface a {
   color: var(--admin-primary);
   text-decoration: underline;
+  unicode-bidi: isolate;
+  direction: ltr;
 }
 
 .rich-html-editor__surface:empty::before {
